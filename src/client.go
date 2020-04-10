@@ -1,6 +1,7 @@
 package bluzelle
 
 const DEFAULT_ENDPOINT string = "http://localhost:1317"
+const DEFAULT_UUID string = "bluzelle"
 
 type ClientOptions struct {
 	Address  string
@@ -31,6 +32,10 @@ func NewClient(options *ClientOptions) (*Client, error) {
 
 	if client.Endpoint == "" {
 		client.Endpoint = DEFAULT_ENDPOINT
+	}
+
+	if client.UUID == "" {
+		client.UUID = DEFAULT_UUID
 	}
 
 	// generate private key from mnemonic

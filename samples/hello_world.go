@@ -30,4 +30,11 @@ func main() {
 	} else {
 		log.Infof("account info: %+v", account)
 	}
+
+	// read key
+	if val, err := ctx.Read("tour 2020", false); err != nil {
+		log.Fatalf("%s", err)
+	} else {
+		log.Infof("val for key(%s): %+v", "tour 2020", val)
+	}
 }
