@@ -23,23 +23,29 @@ type TransactionInitRequestBaseReq struct {
 }
 
 type TransactionInitRequestKeyValue struct {
-	Key   string `json:"key"`
-	Value string `json:"value,omitempty"`
+	Key       string                            `json:"key"`
+	KeyValues []*TransactionInitRequestKeyValue `json:"KeyValues,omitempty"`
+	NewKey    string                            `json:"NewKey,omitempty"`
+	Value     string                            `json:"value,omitempty"`
 }
 
 type TransactionInitRequest struct {
-	BaseReq *TransactionInitRequestBaseReq `json:"BaseReq"`
-	UUID    string                         `json:"UUID"`
-	Key     string                         `json:"Key"`
-	Value   string                         `json:"Value,omitempty"`
-	Owner   string                         `json:"Owner"`
+	BaseReq   *TransactionInitRequestBaseReq    `json:"BaseReq"`
+	UUID      string                            `json:"UUID"`
+	Key       string                            `json:"Key"`
+	KeyValues []*TransactionInitRequestKeyValue `json:"KeyValues,omitempty"`
+	NewKey    string                            `json:"NewKey,omitempty"`
+	Value     string                            `json:"Value,omitempty"`
+	Owner     string                            `json:"Owner"`
 }
 
 type TransactionInitResponseValueMsgValue struct {
-	Key   string `json:"Key"`
-	Owner string `json:"Owner"`
-	UUID  string `json:"UUID"`
-	Value string `json:"Value,omitempty"`
+	Key       string                            `json:"Key"`
+	KeyValues []*TransactionInitRequestKeyValue `json:"KeyValues,omitempty"`
+	NewKey    string                            `json:"NewKey,omitempty"`
+	Owner     string                            `json:"Owner"`
+	UUID      string                            `json:"UUID"`
+	Value     string                            `json:"Value,omitempty"`
 }
 
 type TransactionInitResponseValueMsg struct {
@@ -119,6 +125,8 @@ type TransactionBroadcastResponse struct {
 type Transaction struct {
 	Key                string
 	Value              string
+	KeyValues          []*TransactionInitRequestKeyValue
+	NewKey             string
 	Address            string
 	UUID               string
 	ApiRequestMethod   string
@@ -151,10 +159,12 @@ func (transaction *Transaction) Init() (*TransactionInitResponse, error) {
 			From:    transaction.Address,
 			ChainId: transaction.ChainId,
 		},
-		UUID:  transaction.UUID,
-		Key:   transaction.Key,
-		Value: transaction.Value,
-		Owner: transaction.Address,
+		UUID:      transaction.UUID,
+		Key:       transaction.Key,
+		KeyValues: transaction.KeyValues,
+		NewKey:    transaction.NewKey,
+		Owner:     transaction.Address,
+		Value:     transaction.Value,
 	}
 
 	reqBytes, err := json.Marshal(req)
