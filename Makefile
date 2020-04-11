@@ -6,6 +6,7 @@ help:
 make read key=foo\
 make create key=foo value=bar\
 make update key=foo value=bar\
+make delete key=foo\
 make account\
 "
 
@@ -17,6 +18,9 @@ create:
 
 update:
 	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
+
+delete:
+	@go run examples/crud/$@/*.go $(KEY)
 
 account:
 	@go run examples/crud/$@/*.go
@@ -34,4 +38,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world account update create read help
+.PHONY: fmt test pkgs hello_world account delete update create read help

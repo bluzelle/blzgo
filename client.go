@@ -38,7 +38,7 @@ type Client struct {
 
 func (ctx *Client) SendTransactions() {
 	for transaction := range ctx.transactions {
-		ctx.Infof("processing %s:%s", transaction.Key, transaction.Value)
+		ctx.Infof("processing op for key(%s)", transaction.Key)
 		transaction.Send()
 	}
 }

@@ -22,21 +22,24 @@ type TransactionInitRequestBaseReq struct {
 	ChainId string `json:"chain_id"`
 }
 
+type TransactionInitRequestKeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value,omitempty"`
+}
+
 type TransactionInitRequest struct {
 	BaseReq *TransactionInitRequestBaseReq `json:"BaseReq"`
 	UUID    string                         `json:"UUID"`
 	Key     string                         `json:"Key"`
-	Value   string                         `json:"Value"`
+	Value   string                         `json:"Value,omitempty"`
 	Owner   string                         `json:"Owner"`
 }
-
-//
 
 type TransactionInitResponseValueMsgValue struct {
 	Key   string `json:"Key"`
 	Owner string `json:"Owner"`
 	UUID  string `json:"UUID"`
-	Value string `json:"Value"`
+	Value string `json:"Value,omitempty"`
 }
 
 type TransactionInitResponseValueMsg struct {
@@ -158,7 +161,7 @@ func (transaction *Transaction) Init() (*TransactionInitResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	// transaction.Client.Infof("%+v", string(reqBytes))
+	transaction.Client.Infof("txn init %+v", string(reqBytes))
 	body, err := transaction.Client.APIMutate(transaction.ApiRequestMethod, transaction.ApiRequestEndpoint, reqBytes)
 	if err != nil {
 		return nil, err
@@ -167,7 +170,6 @@ func (transaction *Transaction) Init() (*TransactionInitResponse, error) {
 	res := &TransactionInitResponse{}
 	err = json.Unmarshal(body, res)
 	if err != nil {
-		transaction.Client.Errorf("%+v", err)
 		return nil, err
 	}
 
@@ -218,7 +220,7 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) er
 	if err != nil {
 		return err
 	}
-	// transaction.Client.Infof("%+v", string(reqBytes))
+	transaction.Client.Infof("txn broadcast %+v", string(reqBytes))
 	body, err := transaction.Client.APIMutate("POST", TX_COMMAND, reqBytes)
 	if err != nil {
 		return err
@@ -227,7 +229,6 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) er
 	res := &TransactionBroadcastResponse{}
 	err = json.Unmarshal(body, res)
 	if err != nil {
-		transaction.Client.Errorf("%+v", err)
 		return err
 	}
 
@@ -269,6 +270,7 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction
 	if err != nil {
 		return nil, err
 	}
+	transaction.Client.Infof("txn sign %+v", string(payloadBytes))
 	sig := ""
 	hash := hashSha256(payloadBytes)
 	if s, err := transaction.Client.PrivateKey.Sign(hash); err != nil {
