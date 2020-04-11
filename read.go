@@ -6,8 +6,6 @@ import (
 
 type ReadResponseResult struct {
 	Value string `json:"value"`
-	Key   string `json:"key"`
-	UUID  string `json:"uuid"`
 }
 
 type ReadResponse struct {

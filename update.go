@@ -1,15 +1,5 @@
 package bluzelle
 
-type UpdateResponseResult struct {
-	Value string `json:"value"`
-	Key   string `json:"key"`
-	UUID  string `json:"uuid"`
-}
-
-type UpdateResponse struct {
-	Result *UpdateResponseResult `json:"result"`
-}
-
 func (ctx *Client) Update(key string, value string, gasInfo *GasInfo) error {
 	transaction := &Transaction{
 		Key:                key,

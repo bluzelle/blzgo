@@ -9,6 +9,8 @@ make create key=foo value=bar\
 make update key=foo value=bar\
 make delete key=foo\
 make rename key=foo newkey=baz\
+make has key=foo\
+\
 make account\
 make version\
 "
@@ -28,11 +30,18 @@ delete:
 rename:
 	@go run examples/crud/$@/*.go $(KEY) $(NEW_KEY)
 
+has:
+	@go run examples/crud/$@/*.go $(KEY)
+
+#
+
 account:
 	@go run examples/crud/$@/*.go
 
 version:
 	@go run examples/crud/$@/*.go
+
+#
 
 hello_world:
 	@go run examples/hello_world/*.go
@@ -47,4 +56,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account rename delete update create read help
+.PHONY: fmt test pkgs hello_world version account has rename delete update create read help

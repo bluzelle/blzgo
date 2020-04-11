@@ -1,14 +1,5 @@
 package bluzelle
 
-type DeleteResponseResult struct {
-	Key  string `json:"key"`
-	UUID string `json:"uuid"`
-}
-
-type DeleteResponse struct {
-	Result *DeleteResponseResult `json:"result"`
-}
-
 func (ctx *Client) Delete(key string, gasInfo *GasInfo) error {
 	transaction := &Transaction{
 		Key:                key,

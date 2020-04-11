@@ -1,15 +1,5 @@
 package bluzelle
 
-type RenameResponseResult struct {
-	Value string `json:"value"`
-	Key   string `json:"key"`
-	UUID  string `json:"uuid"`
-}
-
-type RenameResponse struct {
-	Result *RenameResponseResult `json:"result"`
-}
-
 func (ctx *Client) Rename(key string, newKey string, gasInfo *GasInfo) error {
 	transaction := &Transaction{
 		Key:                key,
