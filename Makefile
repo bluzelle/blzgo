@@ -1,7 +1,6 @@
 KEY=$(key)
 VALUE=$(value)
 NEW_KEY=$(newkey)
-UUID=$(uuid)
 PROVE=$(prove)
 
 help:
@@ -13,15 +12,15 @@ make rename key=foo newkey=baz\n\
 \n\
 make read key=foo prove=true\n\
 make has key=foo\n\
-make keys uuid=foo\n\
-make keyvalues uuid=foo\n\
-make count uuid=foo\n\
+make keys\n\
+make keyvalues\n\
+make count\n\
 \n\
 make txread key=foo prove=true\n\
 make txhas key=foo\n\
-make txkeys uuid=foo\n\
-make txkeyvalues uuid=foo\n\
-make txcount uuid=foo\n\
+make txkeys\n\
+make txkeyvalues\n\
+make txcount\n\
 \n\
 make account\n\
 make version\n\
@@ -48,13 +47,13 @@ has:
 	@go run examples/crud/$@/*.go $(KEY)
 
 keys:
-	@go run examples/crud/$@/*.go $(UUID)
+	@go run examples/crud/$@/*.go
 
 keyvalues:
-	@go run examples/crud/$@/*.go $(UUID)
+	@go run examples/crud/$@/*.go
 
 count:
-	@go run examples/crud/$@/*.go $(UUID)
+	@go run examples/crud/$@/*.go
 
 #
 
@@ -65,18 +64,18 @@ txhas:
 	@go run examples/crud/$@/*.go $(KEY)
 
 txkeys:
-	@go run examples/crud/$@/*.go $(UUID)
+	@go run examples/crud/$@/*.go
 
 txkeyvalues:
-	@go run examples/crud/$@/*.go $(UUID)
+	@go run examples/crud/$@/*.go
 
 txcount:
-	@go run examples/crud/$@/*.go $(UUID)
+	@go run examples/crud/$@/*.go
 
 #
 
 deleteall:
-	@go run examples/crud/$@/*.go $(UUID)
+	@go run examples/crud/$@/*.go
 
 multiupdate:
 	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
@@ -97,6 +96,9 @@ hello_world:
 multi:
 	@go run examples/$@/*.go
 
+uuid:
+	@go run examples/$@/*.go
+
 pkgs:
 	@dep ensure
 
@@ -107,4 +109,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs multi hello_world version account multiupdate deleteall txcount txkeyvalues txkeys txhas txread count keyvalues keys has read rename delete update create help
+.PHONY: fmt test pkgs uuid multi hello_world version account multiupdate deleteall txcount txkeyvalues txkeys txhas txread count keyvalues keys has read rename delete update create help

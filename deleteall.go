@@ -1,13 +1,10 @@
 package bluzelle
 
-func (ctx *Client) DeleteAll(uuid string, gasInfo *GasInfo) error {
+func (ctx *Client) DeleteAll(gasInfo *GasInfo) error {
 	transaction := &Transaction{
-		Address:            ctx.Options.Address,
-		UUID:               uuid,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/deleteall",
 		GasInfo:            gasInfo,
-		ChainId:            ctx.Options.ChainId,
 		Client:             ctx,
 	}
 

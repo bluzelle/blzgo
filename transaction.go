@@ -123,17 +123,20 @@ type TransactionBroadcastResponse struct {
 
 //
 
+type GasInfo struct {
+	MaxGas   int
+	MaxFee   int
+	GasPrice int
+}
+
 type Transaction struct {
 	Key                string
 	Value              string
 	KeyValues          []*KeyValue
 	NewKey             string
-	Address            string
-	UUID               string
 	ApiRequestMethod   string
 	ApiRequestEndpoint string
 	GasInfo            *GasInfo
-	ChainId            string
 	Client             *Client
 
 	done   chan bool
@@ -149,6 +152,10 @@ func (transaction *Transaction) Done(result []byte, err error) {
 }
 
 func (transaction *Transaction) Send() {
+	if transaction.GasInfo == nil {
+		transaction.GasInfo = transaction.Client.options.GasInfo
+	}
+
 	res, err := transaction.Init()
 	if err != nil {
 		transaction.Done(nil, err)
@@ -156,7 +163,7 @@ func (transaction *Transaction) Send() {
 	}
 	b, err := transaction.Broadcast(res)
 	if err == nil {
-		transaction.Client.Account.Sequence += 1
+		transaction.Client.account.Sequence += 1
 	}
 	transaction.Done(b, err)
 }
@@ -164,14 +171,14 @@ func (transaction *Transaction) Send() {
 func (transaction *Transaction) Init() (*TransactionInitResponseValue, error) {
 	req := &TransactionInitRequest{
 		BaseReq: &TransactionInitRequestBaseReq{
-			From:    transaction.Address,
-			ChainId: transaction.ChainId,
+			From:    transaction.Client.options.Address,
+			ChainId: transaction.Client.options.ChainId,
 		},
-		UUID:      transaction.UUID,
+		UUID:      transaction.Client.options.UUID,
 		Key:       transaction.Key,
 		KeyValues: transaction.KeyValues,
 		NewKey:    transaction.NewKey,
-		Owner:     transaction.Address,
+		Owner:     transaction.Client.options.Address,
 		Value:     transaction.Value,
 	}
 
@@ -203,17 +210,19 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 		transaction.Client.Errorf("failed to pass gas to int(%)", data.Fee.Gas)
 	}
 
-	if transaction.GasInfo.MaxGas != 0 && feeGas > transaction.GasInfo.MaxGas {
-		data.Fee.Gas = strconv.Itoa(transaction.GasInfo.MaxGas)
+	gasInfo := transaction.GasInfo
+
+	if gasInfo.MaxGas != 0 && feeGas > gasInfo.MaxGas {
+		data.Fee.Gas = strconv.Itoa(gasInfo.MaxGas)
 	}
 
-	if transaction.GasInfo.MaxFee != 0 {
+	if gasInfo.MaxFee != 0 {
 		data.Fee.Amount = []*TransactionFeeAmount{
-			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(transaction.GasInfo.MaxFee)},
+			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(gasInfo.MaxFee)},
 		}
-	} else if transaction.GasInfo.GasPrice != 0 {
+	} else if gasInfo.GasPrice != 0 {
 		data.Fee.Amount = []*TransactionFeeAmount{
-			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(feeGas * transaction.GasInfo.GasPrice)},
+			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(feeGas * gasInfo.GasPrice)},
 		}
 	}
 
@@ -263,19 +272,19 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 
 func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction) (*TransactionSignature, error) {
 	pubKeyString := ""
-	pubKey := transaction.Client.PrivateKey.PubKey()
+	pubKey := transaction.Client.privateKey.PubKey()
 	if b, err := hex.DecodeString(fmt.Sprintf("%x", secp256k1.CompressPubkey(pubKey.X, pubKey.Y))); err != nil {
 		return nil, err
 	} else {
 		pubKeyString = base64.StdEncoding.EncodeToString(b)
 	}
 
-	seq := strconv.Itoa(transaction.Client.Account.Sequence) // + 1
+	seq := strconv.Itoa(transaction.Client.account.Sequence) // + 1
 
 	// Calculate the SHA256 of the payload object
 	payload := &TransactionBroadcastSignPayload{
-		AccountNumber: strconv.Itoa(transaction.Client.Account.AccountNumber),
-		ChainId:       transaction.Client.Options.ChainId,
+		AccountNumber: strconv.Itoa(transaction.Client.account.AccountNumber),
+		ChainId:       transaction.Client.options.ChainId,
 		Memo:          req.Memo,
 		Sequence:      seq,
 		Fee:           req.Fee, // alreayd sorted
@@ -288,7 +297,7 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction
 	transaction.Client.Infof("txn sign %+v", string(payloadBytes))
 	sig := ""
 	hash := hashSha256(payloadBytes)
-	if s, err := transaction.Client.PrivateKey.Sign(hash); err != nil {
+	if s, err := transaction.Client.privateKey.Sign(hash); err != nil {
 		return nil, err
 	} else {
 		// We have to convert the signature to the format that Tendermint uses
@@ -306,7 +315,7 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction
 			Value: pubKeyString,
 		},
 		Signature:     sig,
-		AccountNumber: strconv.Itoa(transaction.Client.Account.AccountNumber),
+		AccountNumber: strconv.Itoa(transaction.Client.account.AccountNumber),
 		Sequence:      seq,
 	}, nil
 }

@@ -3,28 +3,20 @@ package main
 import (
 	"github.com/apex/log"
 	"github.com/vbstreetz/blzgo/examples/util"
-	"os"
 )
 
 func main() {
 	util.SetupLogging()
 	util.LoadEnv()
 
-	args := os.Args[1:]
-	if len(args) == 0 {
-		log.Fatalf("uuid is required")
-	}
-
 	ctx, err := util.NewClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
 
-	uuid := args[0]
+	log.Infof("deleting all keys...")
 
-	log.Infof("deleting all keys for uuid(%s)...", uuid)
-
-	if err := ctx.DeleteAll(uuid, util.GasInfo()); err != nil {
+	if err := ctx.DeleteAll(util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("done")

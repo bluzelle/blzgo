@@ -13,8 +13,8 @@ type CountResponse struct {
 	Result *CountResponseResult `json:"result"`
 }
 
-func (ctx *Client) Count(uuid string) (int, error) {
-	body, err := ctx.APIQuery("/crud/count/" + uuid)
+func (ctx *Client) Count() (int, error) {
+	body, err := ctx.APIQuery("/crud/count/" + ctx.options.UUID)
 	if err != nil {
 		return 0, err
 	}

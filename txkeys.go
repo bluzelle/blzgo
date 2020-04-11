@@ -4,14 +4,11 @@ import (
 	"encoding/json"
 )
 
-func (ctx *Client) TxKeys(uuid string, gasInfo *GasInfo) ([]string, error) {
+func (ctx *Client) TxKeys(gasInfo *GasInfo) ([]string, error) {
 	transaction := &Transaction{
-		Address:            ctx.Options.Address,
-		UUID:               uuid,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/keys",
 		GasInfo:            gasInfo,
-		ChainId:            ctx.Options.ChainId,
 		Client:             ctx,
 	}
 

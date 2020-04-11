@@ -17,7 +17,7 @@ func (ctx *Client) Read(key string, prove bool) (string, error) {
 	if prove {
 		path = "pread"
 	}
-	body, err := ctx.APIQuery("/crud/" + path + "/" + ctx.Options.UUID + "/" + key)
+	body, err := ctx.APIQuery("/crud/" + path + "/" + ctx.options.UUID + "/" + key)
 	if err != nil {
 		return "", err
 	}

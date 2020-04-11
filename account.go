@@ -21,7 +21,7 @@ type AccountResponse struct {
 func (ctx *Client) ReadAccount() (*Account, error) {
 	res := &AccountResponse{}
 
-	body, err := ctx.APIQuery("/auth/accounts/" + ctx.Options.Address)
+	body, err := ctx.APIQuery("/auth/accounts/" + ctx.options.Address)
 	if err != nil {
 		return nil, err
 	}

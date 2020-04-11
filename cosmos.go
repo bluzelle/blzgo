@@ -7,7 +7,7 @@ import (
 )
 
 func (ctx *Client) APIQuery(endpoint string) ([]byte, error) {
-	url := ctx.Options.Endpoint + endpoint
+	url := ctx.options.Endpoint + endpoint
 
 	ctx.Infof("get %s", url)
 
@@ -27,7 +27,7 @@ func (ctx *Client) APIQuery(endpoint string) ([]byte, error) {
 }
 
 func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]byte, error) {
-	url := ctx.Options.Endpoint + endpoint
+	url := ctx.options.Endpoint + endpoint
 
 	ctx.Infof("post %s", url)
 

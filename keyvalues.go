@@ -17,8 +17,8 @@ type KeyValuesResponse struct {
 	Result *KeyValuesResponseResult `json:"result"`
 }
 
-func (ctx *Client) KeyValues(uuid string) ([]*KeyValuesResponseResultKeyValue, error) {
-	body, err := ctx.APIQuery("/crud/keyvalues/" + uuid)
+func (ctx *Client) KeyValues() ([]*KeyValuesResponseResultKeyValue, error) {
+	body, err := ctx.APIQuery("/crud/keyvalues/" + ctx.options.UUID)
 	if err != nil {
 		return nil, err
 	}

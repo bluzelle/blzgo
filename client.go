@@ -25,15 +25,16 @@ type Options struct {
 	Endpoint string
 	UUID     string
 	ChainId  string
+	GasInfo  *GasInfo
 	Debug    bool
 }
 
 type Client struct {
-	Options      *Options
+	options      *Options
+	account      *Account
+	logger       *log.Entry
+	privateKey   *btcec.PrivateKey
 	transactions chan *Transaction
-	Account      *Account
-	PrivateKey   *btcec.PrivateKey
-	Logger       *log.Entry
 }
 
 func (ctx *Client) SendTransactions() {
@@ -41,6 +42,71 @@ func (ctx *Client) SendTransactions() {
 		ctx.Infof("processing op for key(%s)", transaction.Key)
 		transaction.Send()
 	}
+}
+
+func (root *Client) UUID(uuid string) *Client {
+	options := &Options{
+		Address: root.options.Address,
+		// Mnemonic: root.options.Mnemonic,
+		Endpoint: root.options.Endpoint,
+		UUID:     uuid,
+		ChainId:  root.options.ChainId,
+		GasInfo:  root.options.GasInfo,
+		Debug:    root.options.Debug,
+	}
+
+	ctx := &Client{
+		options:    options,
+		account:    root.account,
+		privateKey: root.privateKey,
+	}
+
+	ctx.setupLogger()
+	ctx.serveTransactions()
+
+	return ctx
+}
+
+func (ctx *Client) setupLogger() {
+	ctx.logger = log.WithFields(log.Fields{})
+}
+
+func (ctx *Client) serveTransactions() {
+	ctx.transactions = make(chan *Transaction, 1) // serial
+	go ctx.SendTransactions()
+}
+
+func (ctx *Client) setPrivateKey() error {
+	// generate private key from mnemonic
+	if key, err := getECPrivateKey(ctx.options.Mnemonic, ctx.options.Address); err != nil {
+		return err
+	} else {
+		ctx.privateKey = key
+	}
+
+	// validate address against mnemonic
+	pubkey := ctx.privateKey.PubKey()
+	x := secp256k1.CompressPubkey(pubkey.X, pubkey.Y)
+	b := hashRipemd160(hashSha256(x))
+
+	if z, err := bech32.ConvertBits(b, 8, 5, true); err != nil {
+		return err
+	} else {
+		if a, err := bech32.Encode(ADDRESS_PREFIX, z); err != nil {
+			return err
+		} else if ctx.options.Address != a {
+			return fmt.Errorf("Bad credentials - verify your address and mnemonic")
+		}
+	}
+
+	// get account number and sequence
+	if account, err := ctx.ReadAccount(); err != nil {
+		return err
+	} else {
+		ctx.account = account
+	}
+
+	return nil
 }
 
 func NewClient(options *Options) (*Client, error) {
@@ -56,44 +122,23 @@ func NewClient(options *Options) (*Client, error) {
 		options.UUID = options.Address
 	}
 
-	ctx := &Client{
-		Options: options,
-	}
-
-	ctx.Logger = log.WithFields(log.Fields{})
-
-	// generate private key from mnemonic
-	if key, err := getECPrivateKey(ctx.Options.Mnemonic, ctx.Options.Address); err != nil {
-		return nil, err
-	} else {
-		ctx.PrivateKey = key
-	}
-
-	// validate address against mnemonic
-	pubkey := ctx.PrivateKey.PubKey()
-	x := secp256k1.CompressPubkey(pubkey.X, pubkey.Y)
-	b := hashRipemd160(hashSha256(x))
-
-	if z, err := bech32.ConvertBits(b, 8, 5, true); err != nil {
-		return nil, err
-	} else {
-		if a, err := bech32.Encode(ADDRESS_PREFIX, z); err != nil {
-			return nil, err
-		} else if ctx.Options.Address != a {
-			return nil, fmt.Errorf("Bad credentials - verify your address and mnemonic")
+	if options.GasInfo == nil {
+		options.GasInfo = &GasInfo{ // todo
+			MaxFee: 4000001,
 		}
 	}
 
-	// get account number and sequence
-	if account, err := ctx.ReadAccount(); err != nil {
-		return nil, err
-	} else {
-		ctx.Account = account
+	ctx := &Client{
+		options: options,
 	}
 
-	// serve transactions
-	ctx.transactions = make(chan *Transaction, 1) // serial
-	go ctx.SendTransactions()
+	ctx.setupLogger()
+
+	if err := ctx.setPrivateKey(); err != nil {
+		return nil, err
+	}
+
+	ctx.serveTransactions()
 
 	return ctx, nil
 }

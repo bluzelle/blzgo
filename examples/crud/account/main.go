@@ -14,7 +14,7 @@ func main() {
 		log.Fatalf("%s", err)
 	}
 
-	log.Infof("getting account info for address(%s)...", ctx.Options.Address)
+	log.Infof("getting account info...")
 
 	if account, err := ctx.ReadAccount(); err != nil {
 		log.Fatalf("%s", err)

@@ -22,7 +22,10 @@ func NewClient() (*bluzelle.Client, error) {
 		UUID:     os.Getenv("UUID"),
 		Endpoint: os.Getenv("ENDPOINT"),
 		ChainId:  os.Getenv("CHAIN_ID"),
-		Debug:    debug,
+		GasInfo: &bluzelle.GasInfo{
+			MaxFee: 4000001,
+		},
+		Debug: debug,
 	}
 	ctx, err := bluzelle.NewClient(options)
 	if err != nil {

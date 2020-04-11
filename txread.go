@@ -7,12 +7,9 @@ import (
 func (ctx *Client) TxRead(key string, gasInfo *GasInfo) (string, error) {
 	transaction := &Transaction{
 		Key:                key,
-		Address:            ctx.Options.Address,
-		UUID:               ctx.Options.UUID,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/read",
 		GasInfo:            gasInfo,
-		ChainId:            ctx.Options.ChainId,
 		Client:             ctx,
 	}
 

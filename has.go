@@ -13,7 +13,7 @@ type HasResponse struct {
 }
 
 func (ctx *Client) Has(key string) (bool, error) {
-	body, err := ctx.APIQuery("/crud/has/" + ctx.Options.UUID + "/" + key)
+	body, err := ctx.APIQuery("/crud/has/" + ctx.options.UUID + "/" + key)
 	if err != nil {
 		return false, err
 	}
