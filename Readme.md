@@ -36,6 +36,20 @@ if account, err := client.ReadAccount(); err != nil {
 }
 ```
 
+### Examples
+
+You can test out the `examples/` included by:
+
+1. Copy `.env.sample` to `.env` to configure the environment. Update the file `.env` accordingly, you can use the settings documented [here](https://docs.bluzelle.com/developers/bluzelle-db/getting-started-with-testnet).
+
+2. Install dependencies:
+
+    $ go get ./...
+
+3. Run an example as defined in the `Makefile`, for example, to read the value of a previously set key(`foo`), run:
+
+    $ make read key=foo
+
 ### Licence
 
 MIT

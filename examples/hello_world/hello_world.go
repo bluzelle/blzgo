@@ -3,25 +3,13 @@ package main
 import (
 	"github.com/apex/log"
 	"github.com/vbstreetz/blzgo"
-	"os"
+	"github.com/vbstreetz/blzgo/examples/util"
 	"strconv"
 	"time"
 )
 
 func main() {
-	setupLogging()
-	loadEnv()
-
-	// create client
-	options := &bluzelle.Options{
-		Address:  os.Getenv("ADDRESS"),
-		Mnemonic: os.Getenv("MNEMONIC"),
-		UUID:     os.Getenv("UUID"),
-		Endpoint: os.Getenv("ENDPOINT"),
-		ChainId:  os.Getenv("CHAIN_ID"),
-		// Debug: true,
-	}
-	ctx, err := bluzelle.NewClient(options)
+	ctx, err := util.NewClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}

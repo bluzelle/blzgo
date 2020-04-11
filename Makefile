@@ -1,5 +1,15 @@
+KEY=$(key)
+
+help:
+	@echo "\
+make read key=foo\
+"
+
+read:
+	@go run examples/crud/read/*.go $(KEY)
+
 hello_world:
-	@go run samples/hello_world/*.go
+	@go run examples/hello_world/*.go
 
 pkgs:
 	@dep ensure
@@ -9,5 +19,6 @@ test:
 
 fmt:
 	@gofmt -w *.go
+	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world
+.PHONY: fmt test pkgs hello_world read help
