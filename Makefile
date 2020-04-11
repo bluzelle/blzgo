@@ -4,18 +4,19 @@ NEW_KEY=$(newkey)
 UUID=$(uuid)
 
 help:
-	@echo "\
-make read key=foo\
-make create key=foo value=bar\
-make update key=foo value=bar\
-make delete key=foo\
-make rename key=foo newkey=baz\
-make has key=foo\
-make keys uuid=foo\
-make keyvalues uuid=foo\
-\
-make account\
-make version\
+	@echo "\n\
+make read key=foo\n\
+make create key=foo value=bar\n\
+make update key=foo value=bar\n\
+make delete key=foo\n\
+make rename key=foo newkey=baz\n\
+make has key=foo\n\
+make keys uuid=foo\n\
+make keyvalues uuid=foo\n\
+make count uuid=foo\n\
+\n\
+make account\n\
+make version\n\
 "
 
 read:
@@ -42,6 +43,9 @@ keys:
 keyvalues:
 	@go run examples/crud/$@/*.go $(UUID)
 
+count:
+	@go run examples/crud/$@/*.go $(UUID)
+
 #
 
 account:
@@ -65,4 +69,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account keyvalues keys has rename delete update create read help
+.PHONY: fmt test pkgs hello_world version account count keyvalues keys has rename delete update create read help
