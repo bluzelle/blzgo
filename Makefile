@@ -103,7 +103,9 @@ pkgs:
 	@dep ensure
 
 test:
-	@go test . -test.v
+#	@go test . -test.v
+	@./test.sh
+	@./testtx.sh
 
 fmt:
 	@gofmt -w *.go

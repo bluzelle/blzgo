@@ -50,6 +50,10 @@ You can test out the `examples/` included by:
 
     $ make read key=foo
 
+### Integration Tests
+
+    $ make test
+    
 ### Licence
 
 MIT
