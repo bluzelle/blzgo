@@ -12,6 +12,7 @@ make delete key=foo\
 make rename key=foo newkey=baz\
 make has key=foo\
 make keys uuid=foo\
+make keyvalues uuid=foo\
 \
 make account\
 make version\
@@ -38,6 +39,9 @@ has:
 keys:
 	@go run examples/crud/$@/*.go $(UUID)
 
+keyvalues:
+	@go run examples/crud/$@/*.go $(UUID)
+
 #
 
 account:
@@ -61,4 +65,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account keys has rename delete update create read help
+.PHONY: fmt test pkgs hello_world version account keyvalues keys has rename delete update create read help
