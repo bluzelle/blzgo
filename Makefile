@@ -18,6 +18,7 @@ make keyvalues uuid=foo\n\
 make count uuid=foo\n\
 \n\
 make txread key=foo prove=true\n\
+make txhas key=foo\n\
 \n\
 make account\n\
 make version\n\
@@ -57,6 +58,9 @@ count:
 txread:
 	@go run examples/crud/$@/*.go $(KEY) $(PROVE)
 
+txhas:
+	@go run examples/crud/$@/*.go $(KEY)
+
 #
 
 account:
@@ -80,4 +84,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account txread count keyvalues keys has read rename delete update create help
+.PHONY: fmt test pkgs hello_world version account txhas txread count keyvalues keys has read rename delete update create help
