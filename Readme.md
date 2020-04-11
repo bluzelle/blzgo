@@ -14,11 +14,11 @@ Use:
 package main
 
 import (
-  "github.com/vbstreetz/blzgo/src"
+  "github.com/vbstreetz/blzgo"
 )
 
 // create client
-options := &bluzelle.ClientOptions{
+options := &bluzelle.Options{
   Address:  "...",
   Mnemonic: "...",
   Endpoint: "http://testnet.public.bluzelle.com:1317",
@@ -29,7 +29,7 @@ if err != nil {
 }
 
 // read account
-if account, err := client.Account(); err != nil {
+if account, err := client.ReadAccount(); err != nil {
   log.Fatalf("%s", err)
 } else {
   log.Printf("account info: %+v", account)

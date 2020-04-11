@@ -1,14 +1,13 @@
-sample:
-	@go run samples/*.go
+hello_world:
+	@go run samples/hello_world/*.go
 
 pkgs:
 	@dep ensure
 
 test:
-	@go test ./src -test.v
+	@go test . -test.v
 
 fmt:
-	@gofmt -w samples/*
-	@gofmt -w src/*
+	@gofmt -w *.go
 
-.PHONY: fmt test pkgs sample
+.PHONY: fmt test pkgs hello_world

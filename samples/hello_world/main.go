@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo/src"
+	"github.com/vbstreetz/blzgo"
 	"os"
+	"strconv"
+	"time"
 )
 
 func main() {
@@ -11,13 +13,13 @@ func main() {
 	loadEnv()
 
 	// create client
-	options := &bluzelle.ClientOptions{
+	options := &bluzelle.Options{
 		Address:  os.Getenv("ADDRESS"),
 		Mnemonic: os.Getenv("MNEMONIC"),
 		UUID:     os.Getenv("UUID"),
 		Endpoint: os.Getenv("ENDPOINT"),
 		ChainId:  os.Getenv("CHAIN_ID"),
-		Debug:    false,
+		// Debug: true,
 	}
 	ctx, err := bluzelle.NewClient(options)
 	if err != nil {
@@ -25,16 +27,29 @@ func main() {
 	}
 
 	// read account
-	if account, err := ctx.Account(); err != nil {
+	if account, err := ctx.ReadAccount(); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("account info: %+v", account)
 	}
 
-	// read key
-	if val, err := ctx.Read("tour 2020", false); err != nil {
+	key := strconv.FormatInt(time.Now().Unix(), 10)
+	value := "bar"
+	gasInfo := &bluzelle.GasInfo{
+		MaxFee: 4000001,
+	}
+
+	// create key
+	if err := ctx.Create(key, value, gasInfo); err != nil {
 		log.Fatalf("%s", err)
 	} else {
-		log.Infof("val for key(%s): %+v", "tour 2020", val)
+		log.Infof("created key")
+	}
+
+	// read key
+	if v, err := ctx.Read(key, false); err != nil {
+		log.Fatalf("%s", err)
+	} else {
+		log.Infof("val for key(%s): %s", key, v)
 	}
 }

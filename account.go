@@ -18,10 +18,10 @@ type AccountResponse struct {
 	Result *AccountResponseResult `json:"result"`
 }
 
-func (ctx *Client) Account() (*Account, error) {
+func (ctx *Client) ReadAccount() (*Account, error) {
 	res := &AccountResponse{}
 
-	body, err := ctx.Query("/auth/accounts/" + ctx.Address)
+	body, err := ctx.APIQuery("/auth/accounts/" + ctx.Options.Address)
 	if err != nil {
 		return nil, err
 	}

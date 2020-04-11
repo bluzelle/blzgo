@@ -1,0 +1,32 @@
+package bluzelle
+
+type CreateResponseResult struct {
+	Value string `json:"value"`
+	Key   string `json:"key"`
+	UUID  string `json:"uuid"`
+}
+
+type CreateResponse struct {
+	Result *CreateResponseResult `json:"result"`
+}
+
+func (ctx *Client) Create(key string, value string, gasInfo *GasInfo) error {
+	transaction := &Transaction{
+		Key:                key,
+		Value:              value,
+		Address:            ctx.Options.Address,
+		UUID:               ctx.Options.UUID,
+		ApiRequestMethod:   "POST",
+		ApiRequestEndpoint: "/crud/create",
+		GasInfo:            gasInfo,
+		ChainId:            ctx.Options.ChainId,
+		Client:             ctx,
+	}
+
+	err := ctx.SendTransaction(transaction)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -3,17 +3,11 @@ package main
 import (
 	"github.com/apex/log"
 	clih "github.com/apex/log/handlers/cli"
-	jsonh "github.com/apex/log/handlers/json"
 	"github.com/joho/godotenv"
-	"os"
 )
 
 func setupLogging() {
-	if os.Getenv("ENV") == "" { // dev
-		log.SetHandler(clih.Default)
-	} else {
-		log.SetHandler(jsonh.Default)
-	}
+	log.SetHandler(clih.Default)
 	log.SetLevel(log.DebugLevel)
 }
 
