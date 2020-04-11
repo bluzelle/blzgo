@@ -9,10 +9,10 @@ import (
 func main() {
 	util.SetupLogging()
 	util.LoadEnv()
-	
+
 	args := os.Args[1:]
-	if len(args) == 0 {
-		log.Fatalf("key is required")
+	if len(args) < 2 {
+		log.Fatalf("both key and value are required")
 	}
 
 	ctx, err := util.NewClient()
@@ -21,12 +21,13 @@ func main() {
 	}
 
 	key := args[0]
+	value := args[1]
 
-	log.Infof("getting val for key(%s)...", key)
+	log.Infof("creating key(%s)=val(%s)...", key, value)
 
-	if v, err := ctx.Read(key, false); err != nil {
+	if err := ctx.Create(key, value, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
-		log.Infof("val for key(%s): %s", key, v)
+		log.Infof("created key")
 	}
 }

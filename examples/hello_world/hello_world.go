@@ -2,13 +2,15 @@ package main
 
 import (
 	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo"
 	"github.com/vbstreetz/blzgo/examples/util"
 	"strconv"
 	"time"
 )
 
 func main() {
+	util.SetupLogging()
+	util.LoadEnv()
+
 	ctx, err := util.NewClient()
 	if err != nil {
 		log.Fatalf("%s", err)
@@ -23,12 +25,9 @@ func main() {
 
 	key := strconv.FormatInt(time.Now().Unix(), 10)
 	value := "bar"
-	gasInfo := &bluzelle.GasInfo{
-		MaxFee: 4000001,
-	}
 
 	// create key
-	if err := ctx.Create(key, value, gasInfo); err != nil {
+	if err := ctx.Create(key, value, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("created key")

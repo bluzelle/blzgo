@@ -10,9 +10,6 @@ import (
 )
 
 func NewClient() (*bluzelle.Client, error) {
-	setupLogging()
-	loadEnv()
-
 	debug := false
 	if d, err := strconv.ParseBool(os.Getenv("DEBUG")); err == nil {
 		debug = d
@@ -35,12 +32,18 @@ func NewClient() (*bluzelle.Client, error) {
 	return ctx, nil
 }
 
-func setupLogging() {
+func GasInfo() *bluzelle.GasInfo {
+	return &bluzelle.GasInfo{
+		MaxFee: 4000001,
+	}
+}
+
+func SetupLogging() {
 	log.SetHandler(clih.Default)
 	log.SetLevel(log.DebugLevel)
 }
 
-func loadEnv() {
+func LoadEnv() {
 	if err := godotenv.Load(); err != nil {
 		// log.Errorf("%s", err)
 		if err := godotenv.Load("../.env"); err != nil { // when running tests
