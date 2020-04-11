@@ -16,6 +16,8 @@ const TX_COMMAND string = "/txs"
 const TOKEN_NAME string = "ubnt"
 
 //
+// JSON struct keys are ordered alphabetically
+//
 
 type TransactionInitRequestBaseReq struct {
 	From    string `json:"from"`
