@@ -231,7 +231,11 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) er
 		return err
 	}
 
-	transaction.Client.Infof("broadcast %+v", res.RawLog)
+	transaction.Client.Infof("broadcast %d %+v", res.Code, res.RawLog)
+
+	if res.Code != 0 {
+		return fmt.Errorf("%s", res.RawLog)
+	}
 
 	return nil
 }

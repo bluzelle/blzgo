@@ -60,10 +60,7 @@ func NewClient(options *Options) (*Client, error) {
 		Options: options,
 	}
 
-	ctx.Logger = log.WithFields(log.Fields{
-		"app": "myapp",
-		"env": "prod",
-	})
+	ctx.Logger = log.WithFields(log.Fields{})
 
 	// generate private key from mnemonic
 	if key, err := getECPrivateKey(ctx.Options.Mnemonic, ctx.Options.Address); err != nil {

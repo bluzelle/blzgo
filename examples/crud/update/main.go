@@ -23,11 +23,11 @@ func main() {
 	key := args[0]
 	value := args[1]
 
-	log.Infof("creating key(%s), val(%s)...", key, value)
+	log.Infof("updating key(%s), val(%s)...", key, value)
 
-	if err := ctx.Create(key, value, util.GasInfo()); err != nil {
+	if err := ctx.Update(key, value, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
-		log.Infof("created key")
+		log.Infof("updated key")
 	}
 }
