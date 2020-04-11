@@ -6,22 +6,22 @@ PROVE=$(prove)
 
 help:
 	@echo "\n\
-make read key=foo prove=true\n\
 make create key=foo value=bar\n\
 make update key=foo value=bar\n\
 make delete key=foo\n\
 make rename key=foo newkey=baz\n\
+\n\
+make read key=foo prove=true\n\
 make has key=foo\n\
 make keys uuid=foo\n\
 make keyvalues uuid=foo\n\
 make count uuid=foo\n\
 \n\
+make txread key=foo prove=true\n\
+\n\
 make account\n\
 make version\n\
 "
-
-read:
-	@go run examples/crud/$@/*.go $(KEY) $(PROVE)
 
 create:
 	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
@@ -35,6 +35,11 @@ delete:
 rename:
 	@go run examples/crud/$@/*.go $(KEY) $(NEW_KEY)
 
+#
+
+read:
+	@go run examples/crud/$@/*.go $(KEY) $(PROVE)
+
 has:
 	@go run examples/crud/$@/*.go $(KEY)
 
@@ -46,6 +51,11 @@ keyvalues:
 
 count:
 	@go run examples/crud/$@/*.go $(UUID)
+
+#
+
+txread:
+	@go run examples/crud/$@/*.go $(KEY) $(PROVE)
 
 #
 
@@ -70,4 +80,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account count keyvalues keys has rename delete update create read help
+.PHONY: fmt test pkgs hello_world version account txread count keyvalues keys has read rename delete update create help

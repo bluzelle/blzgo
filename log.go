@@ -31,3 +31,10 @@ func (ctx *Client) Errorf(msg string, v ...interface{}) {
 		ctx.Logger.Error(fmt.Sprintf(msg, v...))
 	}
 }
+
+// Fatalf level formatted messagctx.Logger.
+func (ctx *Client) Fatalf(msg string, v ...interface{}) {
+	if ctx.Options.Debug {
+		ctx.Logger.Fatal(fmt.Sprintf(msg, v...))
+	}
+}

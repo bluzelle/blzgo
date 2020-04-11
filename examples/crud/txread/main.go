@@ -4,7 +4,6 @@ import (
 	"github.com/apex/log"
 	"github.com/vbstreetz/blzgo/examples/util"
 	"os"
-	"strconv"
 )
 
 func main() {
@@ -22,16 +21,10 @@ func main() {
 	}
 
 	key := args[0]
-	prove := false
-	if len(args) > 1 {
-		if b, err := strconv.ParseBool(args[1]); err == nil {
-			prove = b
-		}
-	}
 
-	log.Infof("getting val for key(%s) prove(%t)...", key, prove)
+	log.Infof("getting val for key(%s)...", key)
 
-	if v, err := ctx.Read(key, prove); err != nil {
+	if v, err := ctx.TxRead(key, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("val(%s)", v)

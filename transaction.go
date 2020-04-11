@@ -113,7 +113,8 @@ type TransactionBroadcastRequest struct {
 
 type TransactionBroadcastResponse struct {
 	Height    string `json:"height"`
-	Hash      string `json:"txhash"`
+	TxHash    string `json:"txhash"`
+	Data      string `json:"data"`
 	Codespace string `json:"codespace"`
 	Code      int    `json:"code"`
 	RawLog    string `json:"raw_log"`
@@ -135,25 +136,29 @@ type Transaction struct {
 	ChainId            string
 	Client             *Client
 
-	done chan error
+	done   chan bool
+	result []byte
+	err    error
+}
+
+func (transaction *Transaction) Done(result []byte, err error) {
+	transaction.result = result
+	transaction.err = err
+	transaction.done <- true
+	close(transaction.done)
 }
 
 func (transaction *Transaction) Send() {
 	res, err := transaction.Init()
 	if err != nil {
-		transaction.Done(err)
+		transaction.Done(nil, err)
 		return
 	}
-
-	if err := transaction.Broadcast(res.Value); err != nil {
-		transaction.Done(err)
-		return
-	}
-
-	transaction.Done(err)
+	b, err := transaction.Broadcast(res)
+	transaction.Done(b, err)
 }
 
-func (transaction *Transaction) Init() (*TransactionInitResponse, error) {
+func (transaction *Transaction) Init() (*TransactionInitResponseValue, error) {
 	req := &TransactionInitRequest{
 		BaseReq: &TransactionInitRequestBaseReq{
 			From:    transaction.Address,
@@ -183,10 +188,10 @@ func (transaction *Transaction) Init() (*TransactionInitResponse, error) {
 		return nil, err
 	}
 
-	return res, nil
+	return res.Value, nil
 }
 
-func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) error {
+func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([]byte, error) {
 	// set the gas info
 	feeGas, err := strconv.Atoi(data.Fee.Gas)
 	if err != nil {
@@ -217,7 +222,7 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) er
 	// sign
 	sig, err := transaction.Sign(txn)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	txn.Signatures = []*TransactionSignature{sig}
 	txn.Signature = sig
@@ -228,32 +233,27 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) er
 	}
 	reqBytes, err := json.Marshal(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	transaction.Client.Infof("txn broadcast %+v", string(reqBytes))
 	body, err := transaction.Client.APIMutate("POST", TX_COMMAND, reqBytes)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	res := &TransactionBroadcastResponse{}
 	err = json.Unmarshal(body, res)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	transaction.Client.Infof("broadcast %d %+v", res.Code, res.RawLog)
+	transaction.Client.Infof("broadcast %+v", res)
 
 	if res.Code != 0 {
-		return fmt.Errorf("%s", res.RawLog)
+		return nil, fmt.Errorf("%s", res.RawLog)
 	}
-
-	return nil
-}
-
-func (transaction *Transaction) Done(err error) {
-	transaction.done <- err
-	close(transaction.done)
+	decodedData, err := hex.DecodeString(res.Data)
+	return decodedData, err
 }
 
 func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction) (*TransactionSignature, error) {

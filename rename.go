@@ -13,7 +13,7 @@ func (ctx *Client) Rename(key string, newKey string, gasInfo *GasInfo) error {
 		Client:             ctx,
 	}
 
-	err := ctx.SendTransaction(transaction)
+	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
 		return err
 	}

@@ -50,12 +50,15 @@ func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]
 	return body, nil
 }
 
-func (ctx *Client) SendTransaction(transaction *Transaction) error {
-	transaction.done = make(chan error, 1)
+func (ctx *Client) SendTransaction(transaction *Transaction) ([]byte, error) {
+	transaction.done = make(chan bool, 1)
 	ctx.transactions <- transaction
-	err := <-transaction.done
-	if err != nil {
-		ctx.Errorf("transaction err(%s)", err)
+	done := <-transaction.done
+	if !done {
+		ctx.Fatalf("txn did not complete") // todo: enqueue
 	}
-	return err
+	if transaction.err != nil {
+		ctx.Errorf("transaction err(%s)", transaction.err)
+	}
+	return transaction.result, transaction.err
 }

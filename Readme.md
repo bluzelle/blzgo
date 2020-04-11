@@ -2,7 +2,7 @@
 
 ### Getting started
 
-Ensure you have a recent version of go installed.
+Ensure you have a recent version of [Go](https://golang.org/) installed.
 
 Grab the package from github:
 
@@ -40,13 +40,13 @@ if account, err := client.ReadAccount(); err != nil {
 
 You can test out the `examples/` included by:
 
-1. Copy `.env.sample` to `.env` to configure the environment. Update the file `.env` accordingly, you can use the settings documented [here](https://docs.bluzelle.com/developers/bluzelle-db/getting-started-with-testnet).
+1. Coping `.env.sample` file to `.env` to configure the environment and then updating the resulting file, `.env`, accordingly. You can find test settings documented in the [Bluzelle getting started tutorial](https://docs.bluzelle.com/developers/bluzelle-db/getting-started-with-testnet).
 
 2. Install dependencies:
 
     $ go get ./...
 
-3. Run an example as defined in the `Makefile`, for example, to read the value of a previously set key(`foo`), run:
+3. Run an example as defined in the `Makefile`, for example, to read the value of an existing key, `foo`, run:
 
     $ make read key=foo
 
