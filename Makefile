@@ -2,10 +2,11 @@ KEY=$(key)
 VALUE=$(value)
 NEW_KEY=$(newkey)
 UUID=$(uuid)
+PROVE=$(prove)
 
 help:
 	@echo "\n\
-make read key=foo\n\
+make read key=foo prove=true\n\
 make create key=foo value=bar\n\
 make update key=foo value=bar\n\
 make delete key=foo\n\
@@ -20,7 +21,7 @@ make version\n\
 "
 
 read:
-	@go run examples/crud/$@/*.go $(KEY)
+	@go run examples/crud/$@/*.go $(KEY) $(PROVE)
 
 create:
 	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
