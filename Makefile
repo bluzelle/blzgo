@@ -1,6 +1,7 @@
 KEY=$(key)
 VALUE=$(value)
 NEW_KEY=$(newkey)
+UUID=$(uuid)
 
 help:
 	@echo "\
@@ -10,6 +11,7 @@ make update key=foo value=bar\
 make delete key=foo\
 make rename key=foo newkey=baz\
 make has key=foo\
+make keys uuid=foo\
 \
 make account\
 make version\
@@ -32,6 +34,9 @@ rename:
 
 has:
 	@go run examples/crud/$@/*.go $(KEY)
+
+keys:
+	@go run examples/crud/$@/*.go $(UUID)
 
 #
 
@@ -56,4 +61,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account has rename delete update create read help
+.PHONY: fmt test pkgs hello_world version account keys has rename delete update create read help
