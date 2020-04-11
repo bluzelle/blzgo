@@ -155,6 +155,9 @@ func (transaction *Transaction) Send() {
 		return
 	}
 	b, err := transaction.Broadcast(res)
+	if err == nil {
+		transaction.Client.Account.Sequence += 1
+	}
 	transaction.Done(b, err)
 }
 

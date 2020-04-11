@@ -92,7 +92,10 @@ version:
 #
 
 hello_world:
-	@go run examples/hello_world/*.go
+	@go run examples/$@/*.go
+
+multi:
+	@go run examples/$@/*.go
 
 pkgs:
 	@dep ensure
@@ -104,4 +107,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account multiupdate deleteall txcount txkeyvalues txkeys txhas txread count keyvalues keys has read rename delete update create help
+.PHONY: fmt test pkgs multi hello_world version account multiupdate deleteall txcount txkeyvalues txkeys txhas txread count keyvalues keys has read rename delete update create help
