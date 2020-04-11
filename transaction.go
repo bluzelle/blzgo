@@ -23,7 +23,7 @@ type TransactionInitRequestBaseReq struct {
 }
 
 type TransactionInitRequestKeyValue struct {
-	Key       string                            `json:"key"`
+	Key       string                            `json:"key,omitempty"`
 	KeyValues []*TransactionInitRequestKeyValue `json:"KeyValues,omitempty"`
 	NewKey    string                            `json:"NewKey,omitempty"`
 	Value     string                            `json:"value,omitempty"`
@@ -32,7 +32,7 @@ type TransactionInitRequestKeyValue struct {
 type TransactionInitRequest struct {
 	BaseReq   *TransactionInitRequestBaseReq    `json:"BaseReq"`
 	UUID      string                            `json:"UUID"`
-	Key       string                            `json:"Key"`
+	Key       string                            `json:"Key,omitempty"`
 	KeyValues []*TransactionInitRequestKeyValue `json:"KeyValues,omitempty"`
 	NewKey    string                            `json:"NewKey,omitempty"`
 	Value     string                            `json:"Value,omitempty"`
@@ -40,7 +40,7 @@ type TransactionInitRequest struct {
 }
 
 type TransactionInitResponseValueMsgValue struct {
-	Key       string                            `json:"Key"`
+	Key       string                            `json:"Key,omitempty"`
 	KeyValues []*TransactionInitRequestKeyValue `json:"KeyValues,omitempty"`
 	NewKey    string                            `json:"NewKey,omitempty"`
 	Owner     string                            `json:"Owner"`
