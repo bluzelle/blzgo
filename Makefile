@@ -78,6 +78,9 @@ txcount:
 deleteall:
 	@go run examples/crud/$@/*.go $(UUID)
 
+multiupdate:
+	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
+
 #
 
 account:
@@ -101,4 +104,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world version account deleteall txcount txkeyvalues txkeys txhas txread count keyvalues keys has read rename delete update create help
+.PHONY: fmt test pkgs hello_world version account multiupdate deleteall txcount txkeyvalues txkeys txhas txread count keyvalues keys has read rename delete update create help

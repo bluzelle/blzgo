@@ -22,7 +22,7 @@ func main() {
 
 	uuid := args[0]
 
-	log.Infof("deleting all all keys for uuid(%s)...", uuid)
+	log.Infof("deleting all keys for uuid(%s)...", uuid)
 
 	if err := ctx.DeleteAll(uuid, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
