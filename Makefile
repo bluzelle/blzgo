@@ -10,6 +10,7 @@ make update key=foo value=bar\
 make delete key=foo\
 make rename key=foo newkey=baz\
 make account\
+make version\
 "
 
 read:
@@ -30,6 +31,9 @@ rename:
 account:
 	@go run examples/crud/$@/*.go
 
+version:
+	@go run examples/crud/$@/*.go
+
 hello_world:
 	@go run examples/hello_world/*.go
 
@@ -43,4 +47,4 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs hello_world account rename delete update create read help
+.PHONY: fmt test pkgs hello_world version account rename delete update create read help
