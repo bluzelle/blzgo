@@ -15,19 +15,26 @@ func main() {
 	util.SetupLogging()
 	util.LoadEnv()
 
-	root, err := util.NewClient()
+	uuid1, err := util.NewClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
 
-	ctx := root.UUID("my-different-uuid")
-
+	uuid2 := uuid1.UUID("my-different-uuid")
 	key := fmt.Sprintf("%s", strconv.FormatInt(time.Now().Unix(), 10))
 	value := "bar"
+
 	log.Infof("creating key(%s), value(%s)", key, value)
-	if err := ctx.Create(key, value, util.GasInfo()); err != nil {
+	if err := uuid1.Create(key, value, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
-		log.Infof("created key")
+		log.Infof("created key for root uuid1")
+	}
+
+	log.Infof("creating key(%s), value(%s)", key, value)
+	if err := uuid2.Create(key, value, util.GasInfo()); err != nil {
+		log.Fatalf("%s", err)
+	} else {
+		log.Infof("created key for root uuid2")
 	}
 }
