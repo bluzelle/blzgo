@@ -18,7 +18,6 @@ const TOKEN_NAME string = "ubnt"
 //
 // JSON struct keys are ordered alphabetically
 //
-
 type TransactionInitRequestBaseReq struct {
 	From    string `json:"from"`
 	ChainId string `json:"chain_id"`

@@ -9,7 +9,7 @@ import (
 )
 
 //
-// Example shows ability to create a context client for custom `UUID`
+// Example shows ability to create a context client for a custom `UUID`
 //
 func main() {
 	util.SetupLogging()

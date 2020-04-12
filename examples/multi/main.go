@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+//
+// Example tests correct sequence increment
+// when working with multiple transactions
+//
 func main() {
 	util.SetupLogging()
 	util.LoadEnv()

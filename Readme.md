@@ -2,11 +2,11 @@
 
 ### Getting started
 
-Ensure you have a recent version of [Go](https://golang.org/) installed.
+Ensure you have a recent version of [Go](https://golang.org) installed.
 
 Grab the package from github:
 
-    $ go get -u github.com/vbstreetz/blzgo/src
+    $ go get github.com/vbstreetz/blzgo
 
 Use:
 
@@ -15,24 +15,27 @@ package main
 
 import (
   "github.com/vbstreetz/blzgo"
+  "log"
 )
 
-// create client
-options := &bluzelle.Options{
-  Address:  "...",
-  Mnemonic: "...",
-  Endpoint: "http://testnet.public.bluzelle.com:1317",
-}
-client, err := bluzelle.NewClient(options)
-if err != nil {
-  log.Fatalf("%s", err)
-}
+func main() {
+  // create client
+  options := &bluzelle.Options{
+    Address:  "...",
+    Mnemonic: "...",
+    Endpoint: "http://testnet.public.bluzelle.com:1317",
+  }
+  client, err := bluzelle.NewClient(options)
+  if err != nil {
+    log.Fatalf("%s", err)
+  }
 
-// read account
-if account, err := client.ReadAccount(); err != nil {
-  log.Fatalf("%s", err)
-} else {
-  log.Printf("account info: %+v", account)
+  // read account
+  if account, err := client.ReadAccount(); err != nil {
+    log.Fatalf("%s", err)
+  } else {
+    log.Printf("account info: %+v", account)
+  }
 }
 ```
 
@@ -53,7 +56,7 @@ You can test out the `examples/` included by:
 ### Integration Tests
 
     $ make test
-    
+
 ### Licence
 
 MIT
