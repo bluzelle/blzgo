@@ -39,7 +39,7 @@ type Client struct {
 
 func (ctx *Client) SendTransactions() {
 	for transaction := range ctx.transactions {
-		// ctx.Infof("processing op for key(%+v)", transaction)
+		// ctx.Infof("processing transaction(%+v)", transaction)
 		transaction.Send()
 	}
 }
@@ -68,7 +68,10 @@ func (root *Client) UUID(uuid string) *Client {
 }
 
 func (ctx *Client) setupLogger() {
-	ctx.logger = log.WithFields(log.Fields{})
+	ctx.logger = log.WithFields(log.Fields{
+		"uuid":    ctx.options.UUID,
+		"address": ctx.options.Address,
+	})
 }
 
 func (ctx *Client) serveTransactions() {
