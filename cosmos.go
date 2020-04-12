@@ -2,9 +2,15 @@ package bluzelle
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
 
 func (ctx *Client) APIQuery(endpoint string) ([]byte, error) {
 	url := ctx.options.Endpoint + endpoint
@@ -18,11 +24,7 @@ func (ctx *Client) APIQuery(endpoint string) ([]byte, error) {
 
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
+	body, err := parseResponse(res)
 	return body, nil
 }
 
@@ -42,11 +44,7 @@ func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]
 
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
+	body, err := parseResponse(res)
 	return body, nil
 }
 
@@ -61,4 +59,23 @@ func (ctx *Client) SendTransaction(transaction *Transaction) ([]byte, error) {
 		ctx.Errorf("transaction err(%s)", transaction.err)
 	}
 	return transaction.result, transaction.err
+}
+
+func parseResponse(res *http.Response) ([]byte, error) {
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	errRes := &ErrorResponse{}
+	err = json.Unmarshal(body, errRes)
+	if err != nil {
+		return nil, err
+	}
+
+	if errRes.Error != "" {
+		return nil, fmt.Errorf("%s", errRes.Error)
+	}
+
+	return body, nil
 }
