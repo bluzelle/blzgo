@@ -46,17 +46,17 @@ You can test out the `examples/` included by:
 1. Coping `.env.sample` file to `.env` to configure the environment and then updating the resulting file, `.env`, accordingly. You can find test settings documented in the [Bluzelle getting started tutorial](https://docs.bluzelle.com/developers/bluzelle-db/getting-started-with-testnet).
 
 2. Install dependencies:
-
+```
     $ go get ./...
-
+```
 3. Run an example as defined in the `Makefile`, for example, to read the value of an existing key, `foo`, run:
-
+```
     $ make read key=foo
-
+```
 ### Integration Tests
-
+```
     $ make test
-
+```
 ### Licence
 
 MIT
