@@ -5,11 +5,10 @@ import (
 	"strconv"
 )
 
-func (ctx *Client) TxCount(gasInfo *GasInfo) (int, error) {
+func (ctx *Client) TxCount() (int, error) {
 	transaction := &Transaction{
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/count",
-		GasInfo:            gasInfo,
 		Client:             ctx,
 	}
 

@@ -27,7 +27,7 @@ func main() {
 
 	log.Infof("updating keys(%s)...", keyValues)
 
-	if err := ctx.MultiUpdate(keyValues, util.GasInfo()); err != nil {
+	if err := ctx.MultiUpdate(keyValues); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("done")

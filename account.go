@@ -30,6 +30,5 @@ func (ctx *Client) ReadAccount() (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return res.Result.Value, nil
 }

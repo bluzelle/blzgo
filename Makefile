@@ -105,7 +105,6 @@ pkgs:
 test:
 #	@go test . -test.v
 	@./test.sh
-	@./testtx.sh
 
 fmt:
 	@gofmt -w *.go

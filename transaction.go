@@ -135,7 +135,6 @@ type Transaction struct {
 	NewKey             string
 	ApiRequestMethod   string
 	ApiRequestEndpoint string
-	GasInfo            *GasInfo
 	Client             *Client
 
 	done   chan bool
@@ -151,10 +150,6 @@ func (transaction *Transaction) Done(result []byte, err error) {
 }
 
 func (transaction *Transaction) Send() {
-	if transaction.GasInfo == nil {
-		transaction.GasInfo = transaction.Client.options.GasInfo
-	}
-
 	res, err := transaction.Init()
 	if err != nil {
 		transaction.Done(nil, err)
@@ -209,7 +204,7 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 		transaction.Client.Errorf("failed to pass gas to int(%)", data.Fee.Gas)
 	}
 
-	gasInfo := transaction.GasInfo
+	gasInfo := transaction.Client.options.GasInfo
 
 	if gasInfo.MaxGas != 0 && feeGas > gasInfo.MaxGas {
 		data.Fee.Gas = strconv.Itoa(gasInfo.MaxGas)

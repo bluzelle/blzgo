@@ -1,12 +1,11 @@
 package bluzelle
 
-func (ctx *Client) Update(key string, value string, gasInfo *GasInfo) error {
+func (ctx *Client) Update(key string, value string) error {
 	transaction := &Transaction{
 		Key:                key,
 		Value:              value,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/update",
-		GasInfo:            gasInfo,
 		Client:             ctx,
 	}
 
@@ -14,6 +13,5 @@ func (ctx *Client) Update(key string, value string, gasInfo *GasInfo) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

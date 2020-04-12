@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 )
 
-func (ctx *Client) TxHas(key string, gasInfo *GasInfo) (bool, error) {
+func (ctx *Client) TxHas(key string) (bool, error) {
 	transaction := &Transaction{
 		Key:                key,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/has",
-		GasInfo:            gasInfo,
 		Client:             ctx,
 	}
 

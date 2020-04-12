@@ -35,12 +35,6 @@ func NewClient() (*bluzelle.Client, error) {
 	return ctx, nil
 }
 
-func GasInfo() *bluzelle.GasInfo {
-	return &bluzelle.GasInfo{
-		MaxFee: 4000001,
-	}
-}
-
 func SetupLogging() {
 	log.SetHandler(clih.Default)
 	log.SetLevel(log.DebugLevel)

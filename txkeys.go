@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 )
 
-func (ctx *Client) TxKeys(gasInfo *GasInfo) ([]string, error) {
+func (ctx *Client) TxKeys() ([]string, error) {
 	transaction := &Transaction{
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/keys",
-		GasInfo:            gasInfo,
 		Client:             ctx,
 	}
 
