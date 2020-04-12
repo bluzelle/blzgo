@@ -29,3 +29,5 @@ make delete key=$key2
 echo
 make deleteall
 echo
+make count
+echo

@@ -4,20 +4,15 @@ import (
 	"encoding/json"
 )
 
-type KeyValuesResponseResultKeyValue struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
 type KeyValuesResponseResult struct {
-	KeyValues []*KeyValuesResponseResultKeyValue `json:"keyvalues"`
+	KeyValues []*KeyValue `json:"keyvalues"`
 }
 
 type KeyValuesResponse struct {
 	Result *KeyValuesResponseResult `json:"result"`
 }
 
-func (ctx *Client) KeyValues() ([]*KeyValuesResponseResultKeyValue, error) {
+func (ctx *Client) KeyValues() ([]*KeyValue, error) {
 	body, err := ctx.APIQuery("/crud/keyvalues/" + ctx.options.UUID)
 	if err != nil {
 		return nil, err

@@ -28,13 +28,13 @@ func main() {
 	if err := uuid1.Create(key, value, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
-		log.Infof("created key for root uuid1")
+		log.Infof("created key for uuid1")
 	}
 
 	log.Infof("creating key(%s), value(%s)", key, value)
 	if err := uuid2.Create(key, value, util.GasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
-		log.Infof("created key for root uuid2")
+		log.Infof("created key for uuid2")
 	}
 }
