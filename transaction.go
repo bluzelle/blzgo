@@ -229,11 +229,21 @@ func (transaction *Transaction) Broadcast(txn *TransactionBroadcastPayload) ([]b
 	}
 
 	// Set signatures
-	sig, err := transaction.Sign(txn)
-	if err != nil {
+	if signature, err := transaction.Sign(txn); err != nil {
 		return nil, err
+	} else {
+		txn.Signatures = []*TransactionSignature{
+			&TransactionSignature{
+				PubKey: &TransactionSignaturePubKey{
+					Type:  tmsecp256k1.PubKeyAminoName,
+					Value: base64.StdEncoding.EncodeToString(transaction.Client.privateKey.PubKey().SerializeCompressed()),
+				},
+				Signature:     signature,
+				AccountNumber: strconv.Itoa(transaction.Client.account.AccountNumber),
+				Sequence:      strconv.Itoa(transaction.Client.account.Sequence),
+			},
+		}
 	}
-	txn.Signatures = []*TransactionSignature{sig}
 
 	// Broadcast transaction
 	req := &TransactionBroadcastRequest{
@@ -264,21 +274,11 @@ func (transaction *Transaction) Broadcast(txn *TransactionBroadcastPayload) ([]b
 	return decodedData, err
 }
 
-func (transaction *Transaction) Sign(req *TransactionBroadcastPayload) (*TransactionSignature, error) {
-	// pubKeyValue
-	pubKeyValue := base64.StdEncoding.EncodeToString(transaction.Client.privateKey.PubKey().SerializeCompressed())
-
-	// accountNumber
-	accountNumber := strconv.Itoa(transaction.Client.account.AccountNumber)
-
-	// Sequence
-	seq := strconv.Itoa(transaction.Client.account.Sequence)
-
-	// Calculate the SHA256 of the payload object
+func (transaction *Transaction) Sign(req *TransactionBroadcastPayload) (string, error) {
 	payload := &TransactionBroadcastPayloadSignPayload{
 		AccountNumber: strconv.Itoa(transaction.Client.account.AccountNumber),
 		ChainId:       transaction.Client.options.ChainId,
-		Sequence:      seq,
+		Sequence:      strconv.Itoa(transaction.Client.account.Sequence),
 
 		Memo: req.Memo,
 		Fee:  req.Fee, // already sorted by key
@@ -286,26 +286,15 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastPayload) (*Transac
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	transaction.Client.Infof("txn sign %+v", string(payloadBytes))
-	sig := ""
 	hash := tmcrypto.Sha256(payloadBytes)
 	if s, err := transaction.Client.privateKey.Sign(hash); err != nil {
-		return nil, err
+		return "", err
 	} else {
-		sig = base64.StdEncoding.EncodeToString(serializeSig(s))
+		return base64.StdEncoding.EncodeToString(serializeSig(s)), nil
 	}
-
-	return &TransactionSignature{
-		PubKey: &TransactionSignaturePubKey{
-			Type:  tmsecp256k1.PubKeyAminoName,
-			Value: pubKeyValue,
-		},
-		Signature:     sig,
-		AccountNumber: accountNumber,
-		Sequence:      seq,
-	}, nil
 }
 
 func makeRandomString(length int) string {
