@@ -13,11 +13,11 @@ type ReadResponse struct {
 }
 
 func (ctx *Client) Read(key string) (string, error) {
-	value, err := ctx.ReadWithProof(key, false)
+	value, err := ctx.ProvenRead(key, false)
 	return value, err
 }
 
-func (ctx *Client) ReadWithProof(key string, prove bool) (string, error) {
+func (ctx *Client) ProvenRead(key string, prove bool) (string, error) {
 	path := "read"
 	if prove {
 		path = "pread"

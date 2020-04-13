@@ -23,15 +23,16 @@ func main() {
 
 	key := args[0]
 	prove := false
+
 	if len(args) > 1 {
 		if b, err := strconv.ParseBool(args[1]); err == nil {
 			prove = b
 		}
 	}
 
-	log.Infof("getting val for key(%s)...", key)
+	log.Infof("getting val for key(%s) prove(%t)...", key, prove)
 
-	if v, err := ctx.Read(key); err != nil {
+	if v, err := ctx.ProvenRead(key, prove); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("val(%s)", v)

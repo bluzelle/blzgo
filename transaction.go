@@ -20,39 +20,19 @@ const TOKEN_NAME string = "ubnt"
 //
 // JSON struct keys are ordered alphabetically
 //
-type TransactionInitRequestBaseReq struct {
-	From    string `json:"from"`
-	ChainId string `json:"chain_id"`
-}
 
 type KeyValue struct {
 	Key   string `json:"key,omitempty"`
 	Value string `json:"value,omitempty"`
 }
 
-type TransactionInitRequest struct {
-	BaseReq   *TransactionInitRequestBaseReq `json:"BaseReq"`
-	UUID      string                         `json:"UUID"`
-	Key       string                         `json:"Key,omitempty"`
-	KeyValues []*KeyValue                    `json:"KeyValues,omitempty"`
-	NewKey    string                         `json:"NewKey,omitempty"`
-	Value     string                         `json:"Value,omitempty"`
-	Owner     string                         `json:"Owner"`
+type GasInfo struct {
+	MaxGas   int
+	MaxFee   int
+	GasPrice int
 }
 
-type TransactionInitResponseValueMsgValue struct {
-	Key       string      `json:"Key,omitempty"`
-	KeyValues []*KeyValue `json:"KeyValues,omitempty"`
-	NewKey    string      `json:"NewKey,omitempty"`
-	Owner     string      `json:"Owner"`
-	UUID      string      `json:"UUID"`
-	Value     string      `json:"Value,omitempty"`
-}
-
-type TransactionInitResponseValueMsg struct {
-	Type  string                                `json:"type"`
-	Value *TransactionInitResponseValueMsgValue `json:"value"`
-}
+//
 
 type TransactionFeeAmount struct {
 	Amount string `json:"amount"`
@@ -63,6 +43,8 @@ type TransactionFee struct {
 	Amount []*TransactionFeeAmount `json:"amount"`
 	Gas    string                  `json:"gas"`
 }
+
+//
 
 type TransactionSignaturePubKey struct {
 	Type  string `json:"type"`
@@ -76,40 +58,58 @@ type TransactionSignature struct {
 	Signature     string                      `json:"signature"`
 }
 
-type TransactionInitResponseValue struct {
-	Fee        *TransactionFee                    `json:"fee"`
-	Memo       string                             `json:"memo"`
-	Msg        []*TransactionInitResponseValueMsg `json:"msg"`
-	Signatures []*TransactionSignature            `json:"signatures"`
+//
+
+type TransactionMsgValue struct {
+	Key       string      `json:"Key,omitempty"`
+	KeyValues []*KeyValue `json:"KeyValues,omitempty"`
+	NewKey    string      `json:"NewKey,omitempty"`
+	Owner     string      `json:"Owner"`
+	UUID      string      `json:"UUID"`
+	Value     string      `json:"Value,omitempty"`
 }
 
-type TransactionInitResponse struct {
-	Type  string                        `json:"type"`
-	Value *TransactionInitResponseValue `json:"value"`
+type TransactionMsg struct {
+	Type  string               `json:"type"`
+	Value *TransactionMsgValue `json:"value"`
 }
 
 //
 
-type TransactionBroadcastSignPayload struct {
-	AccountNumber string                             `json:"account_number"`
-	ChainId       string                             `json:"chain_id"`
-	Fee           *TransactionFee                    `json:"fee"`
-	Memo          string                             `json:"memo"`
-	Msgs          []*TransactionInitResponseValueMsg `json:"msgs"`
-	Sequence      string                             `json:"sequence"`
+type TransactionBroadcastPayload struct {
+	Fee        *TransactionFee         `json:"fee"`
+	Memo       string                  `json:"memo"`
+	Msg        []*TransactionMsg       `json:"msg"`
+	Signatures []*TransactionSignature `json:"signatures"`
 }
 
-type TransactionBroadcastRequestTransaction struct {
-	Fee        *TransactionFee                    `json:"fee"`
-	Memo       string                             `json:"memo"`
-	Msg        []*TransactionInitResponseValueMsg `json:"msg"`
-	Signature  *TransactionSignature              `json:"signature"`
-	Signatures []*TransactionSignature            `json:"signatures"`
+//
+
+type TransactionValidateRequestBaseReq struct {
+	From    string `json:"from"`
+	ChainId string `json:"chain_id"`
 }
+
+type TransactionValidateRequest struct {
+	BaseReq   *TransactionValidateRequestBaseReq `json:"BaseReq"`
+	UUID      string                             `json:"UUID"`
+	Key       string                             `json:"Key,omitempty"`
+	KeyValues []*KeyValue                        `json:"KeyValues,omitempty"`
+	NewKey    string                             `json:"NewKey,omitempty"`
+	Value     string                             `json:"Value,omitempty"`
+	Owner     string                             `json:"Owner"`
+}
+
+type TransactionValidateResponse struct {
+	Type  string                       `json:"type"`
+	Value *TransactionBroadcastPayload `json:"value"`
+}
+
+//
 
 type TransactionBroadcastRequest struct {
-	Transaction *TransactionBroadcastRequestTransaction `json:"tx"`
-	Mode        string                                  `json:"mode"`
+	Transaction *TransactionBroadcastPayload `json:"tx"`
+	Mode        string                       `json:"mode"`
 }
 
 type TransactionBroadcastResponse struct {
@@ -124,11 +124,16 @@ type TransactionBroadcastResponse struct {
 
 //
 
-type GasInfo struct {
-	MaxGas   int
-	MaxFee   int
-	GasPrice int
+type TransactionBroadcastPayloadSignPayload struct {
+	AccountNumber string            `json:"account_number"`
+	ChainId       string            `json:"chain_id"`
+	Fee           *TransactionFee   `json:"fee"`
+	Memo          string            `json:"memo"`
+	Msgs          []*TransactionMsg `json:"msgs"`
+	Sequence      string            `json:"sequence"`
 }
+
+//
 
 type Transaction struct {
 	Key                string
@@ -152,21 +157,22 @@ func (transaction *Transaction) Done(result []byte, err error) {
 }
 
 func (transaction *Transaction) Send() {
-	res, err := transaction.Init()
+	payload, err := transaction.Validate()
 	if err != nil {
 		transaction.Done(nil, err)
 		return
 	}
-	b, err := transaction.Broadcast(res)
+	b, err := transaction.Broadcast(payload)
 	if err == nil {
 		transaction.Client.account.Sequence += 1
 	}
 	transaction.Done(b, err)
 }
 
-func (transaction *Transaction) Init() (*TransactionInitResponseValue, error) {
-	req := &TransactionInitRequest{
-		BaseReq: &TransactionInitRequestBaseReq{
+// Get required min gas
+func (transaction *Transaction) Validate() (*TransactionBroadcastPayload, error) {
+	req := &TransactionValidateRequest{
+		BaseReq: &TransactionValidateRequestBaseReq{
 			From:    transaction.Client.options.Address,
 			ChainId: transaction.Client.options.ChainId,
 		},
@@ -190,7 +196,7 @@ func (transaction *Transaction) Init() (*TransactionInitResponseValue, error) {
 
 	transaction.Client.Infof("txn init %+v", string(body))
 
-	res := &TransactionInitResponse{}
+	res := &TransactionValidateResponse{}
 	err = json.Unmarshal(body, res)
 	if err != nil {
 		return nil, err
@@ -199,40 +205,35 @@ func (transaction *Transaction) Init() (*TransactionInitResponseValue, error) {
 	return res.Value, nil
 }
 
-func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([]byte, error) {
-	// Check the gas info
-	feeGas, err := strconv.Atoi(data.Fee.Gas)
+func (transaction *Transaction) Broadcast(txn *TransactionBroadcastPayload) ([]byte, error) {
+	// Set memo
+	txn.Memo = makeRandomString(32)
+
+	// Set fee
+	feeGas, err := strconv.Atoi(txn.Fee.Gas)
 	if err != nil {
-		transaction.Client.Errorf("failed to pass gas to int(%)", data.Fee.Gas)
+		transaction.Client.Errorf("failed to pass gas to int(%)", txn.Fee.Gas)
 	}
 	gasInfo := transaction.Client.options.GasInfo
 	if gasInfo.MaxGas != 0 && feeGas > gasInfo.MaxGas {
-		data.Fee.Gas = strconv.Itoa(gasInfo.MaxGas)
+		txn.Fee.Gas = strconv.Itoa(gasInfo.MaxGas)
 	}
 	if gasInfo.MaxFee != 0 {
-		data.Fee.Amount = []*TransactionFeeAmount{
+		txn.Fee.Amount = []*TransactionFeeAmount{
 			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(gasInfo.MaxFee)},
 		}
 	} else if gasInfo.GasPrice != 0 {
-		data.Fee.Amount = []*TransactionFeeAmount{
+		txn.Fee.Amount = []*TransactionFeeAmount{
 			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(feeGas * gasInfo.GasPrice)},
 		}
 	}
 
-	// Create transaction payload
-	txn := &TransactionBroadcastRequestTransaction{
-		Msg:  data.Msg,
-		Fee:  data.Fee,
-		Memo: makeRandomString(32),
-	}
-
-	// Sign transaction
+	// Set signatures
 	sig, err := transaction.Sign(txn)
 	if err != nil {
 		return nil, err
 	}
 	txn.Signatures = []*TransactionSignature{sig}
-	txn.Signature = sig
 
 	// Broadcast transaction
 	req := &TransactionBroadcastRequest{
@@ -248,7 +249,7 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 	if err != nil {
 		return nil, err
 	}
-
+	// transaction.Client.Infof("txn broadcast response %+v", string(body))
 	// Read transaction broadcast response
 	res := &TransactionBroadcastResponse{}
 	err = json.Unmarshal(body, res)
@@ -263,7 +264,7 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 	return decodedData, err
 }
 
-func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction) (*TransactionSignature, error) {
+func (transaction *Transaction) Sign(req *TransactionBroadcastPayload) (*TransactionSignature, error) {
 	// pubKeyValue
 	pubKeyValue := base64.StdEncoding.EncodeToString(transaction.Client.privateKey.PubKey().SerializeCompressed())
 
@@ -274,13 +275,14 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction
 	seq := strconv.Itoa(transaction.Client.account.Sequence)
 
 	// Calculate the SHA256 of the payload object
-	payload := &TransactionBroadcastSignPayload{
+	payload := &TransactionBroadcastPayloadSignPayload{
 		AccountNumber: strconv.Itoa(transaction.Client.account.AccountNumber),
 		ChainId:       transaction.Client.options.ChainId,
-		Memo:          req.Memo,
 		Sequence:      seq,
-		Fee:           req.Fee, // already sorted by key
-		Msgs:          req.Msg, // already sorted by key
+
+		Memo: req.Memo,
+		Fee:  req.Fee, // already sorted by key
+		Msgs: req.Msg, // already sorted by key
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
