@@ -279,8 +279,8 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction
 		ChainId:       transaction.Client.options.ChainId,
 		Memo:          req.Memo,
 		Sequence:      seq,
-		Fee:           req.Fee, // alreayd sorted
-		Msgs:          req.Msg, // alreayd sorted
+		Fee:           req.Fee, // already sorted by key
+		Msgs:          req.Msg, // already sorted by key
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {

@@ -29,9 +29,9 @@ func main() {
 		}
 	}
 
-	log.Infof("getting val for key(%s) prove(%t)...", key, prove)
+	log.Infof("getting val for key(%s)...", key)
 
-	if v, err := ctx.Read(key, prove); err != nil {
+	if v, err := ctx.Read(key); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("val(%s)", v)

@@ -24,17 +24,37 @@ func main() {
     Address:  "...",
     Mnemonic: "...",
     Endpoint: "http://testnet.public.bluzelle.com:1317",
+    GasInfo: &bluzelle.GasInfo{
+      MaxFee: 4000001,
+    },
   }
   client, err := bluzelle.NewClient(options)
   if err != nil {
     log.Fatalf("%s", err)
   }
 
-  // read account
-  if account, err := client.ReadAccount(); err != nil {
+  key := "foo"
+  value := "bar"
+
+  // create key
+  if err := client.Create(key, value); err != nil {
     log.Fatalf("%s", err)
   } else {
-    log.Printf("account info: %+v", account)
+    log.Printf("create key success: true\n")
+  }
+
+  // read key
+  if v, err := client.Read(key); err != nil {
+    log.Fatalf("%s", err)
+  } else {
+    log.Printf("read key success: %t\n", v == value)
+  }
+
+  // delete key
+  if err := client.Delete(key); err != nil {
+    log.Fatalf("%s", err)
+  } else {
+    log.Printf("delete key success: true\n")
   }
 }
 ```

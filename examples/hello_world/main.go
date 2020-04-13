@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// read key
-	if v, err := ctx.Read(key, false); err != nil {
+	if v, err := ctx.Read(key); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("val for key(%s): %s", key, v)
