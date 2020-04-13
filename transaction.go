@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -198,18 +198,15 @@ func (transaction *Transaction) Init() (*TransactionInitResponseValue, error) {
 }
 
 func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([]byte, error) {
-	// set the gas info
+	// Check the gas info
 	feeGas, err := strconv.Atoi(data.Fee.Gas)
 	if err != nil {
 		transaction.Client.Errorf("failed to pass gas to int(%)", data.Fee.Gas)
 	}
-
 	gasInfo := transaction.Client.options.GasInfo
-
 	if gasInfo.MaxGas != 0 && feeGas > gasInfo.MaxGas {
 		data.Fee.Gas = strconv.Itoa(gasInfo.MaxGas)
 	}
-
 	if gasInfo.MaxFee != 0 {
 		data.Fee.Amount = []*TransactionFeeAmount{
 			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(gasInfo.MaxFee)},
@@ -220,14 +217,14 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 		}
 	}
 
-	// broadcast
+	// Create transaction payload
 	txn := &TransactionBroadcastRequestTransaction{
 		Msg:  data.Msg,
 		Fee:  data.Fee,
 		Memo: makeRandomString(32),
 	}
 
-	// sign
+	// Sign transaction
 	sig, err := transaction.Sign(txn)
 	if err != nil {
 		return nil, err
@@ -235,6 +232,7 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 	txn.Signatures = []*TransactionSignature{sig}
 	txn.Signature = sig
 
+	// Broadcast transaction
 	req := &TransactionBroadcastRequest{
 		Transaction: txn,
 		Mode:        "block",
@@ -243,20 +241,19 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 	if err != nil {
 		return nil, err
 	}
-	transaction.Client.Infof("txn broadcast %+v", string(reqBytes))
+	transaction.Client.Infof("txn broadcast request %+v", string(reqBytes))
 	body, err := transaction.Client.APIMutate("POST", TX_COMMAND, reqBytes)
 	if err != nil {
 		return nil, err
 	}
 
+	// Read transaction broadcast response
 	res := &TransactionBroadcastResponse{}
 	err = json.Unmarshal(body, res)
 	if err != nil {
 		return nil, err
 	}
-
-	transaction.Client.Infof("broadcast %+v", res)
-
+	transaction.Client.Infof("txn broadcast response %+v", res)
 	if res.Code != 0 {
 		return nil, fmt.Errorf("%s", res.RawLog)
 	}
@@ -267,7 +264,7 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction) (*TransactionSignature, error) {
 	pubKeyString := ""
 	pubKey := transaction.Client.privateKey.PubKey()
-	if b, err := hex.DecodeString(fmt.Sprintf("%x", secp256k1.CompressPubkey(pubKey.X, pubKey.Y))); err != nil {
+	if b, err := hex.DecodeString(fmt.Sprintf("%x", pubKey.SerializeCompressed())); err != nil {
 		return nil, err
 	} else {
 		pubKeyString = base64.StdEncoding.EncodeToString(b)
@@ -290,7 +287,7 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction
 	}
 	transaction.Client.Infof("txn sign %+v", string(payloadBytes))
 	sig := ""
-	hash := hashSha256(payloadBytes)
+	hash := tmcrypto.Sha256(payloadBytes)
 	if s, err := transaction.Client.privateKey.Sign(hash); err != nil {
 		return nil, err
 	} else {
