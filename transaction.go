@@ -5,7 +5,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/btcsuite/btcd/btcec"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
+	tmsecp256k1 "github.com/tendermint/tendermint/crypto/secp256k1"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -262,15 +264,14 @@ func (transaction *Transaction) Broadcast(data *TransactionInitResponseValue) ([
 }
 
 func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction) (*TransactionSignature, error) {
-	pubKeyString := ""
-	pubKey := transaction.Client.privateKey.PubKey()
-	if b, err := hex.DecodeString(fmt.Sprintf("%x", pubKey.SerializeCompressed())); err != nil {
-		return nil, err
-	} else {
-		pubKeyString = base64.StdEncoding.EncodeToString(b)
-	}
+	// pubKeyValue
+	pubKeyValue := base64.StdEncoding.EncodeToString(transaction.Client.privateKey.PubKey().SerializeCompressed())
 
-	seq := strconv.Itoa(transaction.Client.account.Sequence) // + 1
+	// accountNumber
+	accountNumber := strconv.Itoa(transaction.Client.account.AccountNumber)
+
+	// Sequence
+	seq := strconv.Itoa(transaction.Client.account.Sequence)
 
 	// Calculate the SHA256 of the payload object
 	payload := &TransactionBroadcastSignPayload{
@@ -291,22 +292,16 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastRequestTransaction
 	if s, err := transaction.Client.privateKey.Sign(hash); err != nil {
 		return nil, err
 	} else {
-		// We have to convert the signature to the format that Tendermint uses
-		g := []byte{}
-		g = append(s.R.Bytes(), s.S.Bytes()...)
-		sig = base64.StdEncoding.EncodeToString(g)
+		sig = base64.StdEncoding.EncodeToString(serializeSig(s))
 	}
-
-	// transaction.Client.Infof("hash %x", hash)
-	// transaction.Client.Infof("sig %s", sig)
 
 	return &TransactionSignature{
 		PubKey: &TransactionSignaturePubKey{
-			Type:  "tendermint/PubKeySecp256k1",
-			Value: pubKeyString,
+			Type:  tmsecp256k1.PubKeyAminoName,
+			Value: pubKeyValue,
 		},
 		Signature:     sig,
-		AccountNumber: strconv.Itoa(transaction.Client.account.AccountNumber),
+		AccountNumber: accountNumber,
 		Sequence:      seq,
 	}, nil
 }
@@ -319,4 +314,17 @@ func makeRandomString(length int) string {
 		b.WriteRune(chars[rand.Intn(len(chars))])
 	}
 	return b.String()
+}
+
+// https://github.com/tendermint/tendermint/blob/ef56e6661121a7f8d054868689707cd817f27b24/crypto/secp256k1/secp256k1_nocgo.go#L60-L70
+// Serialize signature to R || S.
+// R, S are padded to 32 bytes respectively.
+func serializeSig(sig *btcec.Signature) []byte {
+	rBytes := sig.R.Bytes()
+	sBytes := sig.S.Bytes()
+	sigBytes := make([]byte, 64)
+	// 0 pad the byte arrays from the left if they aren't big enough.
+	copy(sigBytes[32-len(rBytes):32], rBytes)
+	copy(sigBytes[64-len(sBytes):64], sBytes)
+	return sigBytes
 }
