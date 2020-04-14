@@ -21,18 +21,10 @@ type Options struct {
 }
 
 type Client struct {
-	options      *Options
-	account      *Account
-	logger       *log.Entry
-	privateKey   *btcec.PrivateKey
-	transactions chan *Transaction
-}
-
-func (ctx *Client) SendTransactions() {
-	for transaction := range ctx.transactions {
-		// ctx.Infof("processing transaction(%+v)", transaction)
-		transaction.Send()
-	}
+	options    *Options
+	account    *Account
+	logger     *log.Entry
+	privateKey *btcec.PrivateKey
 }
 
 func (root *Client) UUID(uuid string) *Client {
@@ -47,10 +39,9 @@ func (root *Client) UUID(uuid string) *Client {
 	}
 
 	ctx := &Client{
-		options:      options,
-		account:      root.account,
-		privateKey:   root.privateKey,
-		transactions: root.transactions,
+		options:    options,
+		account:    root.account,
+		privateKey: root.privateKey,
 	}
 
 	ctx.setupLogger()
@@ -63,6 +54,16 @@ func (ctx *Client) setupLogger() {
 		"uuid":    ctx.options.UUID,
 		"address": ctx.options.Address,
 	})
+}
+
+// Fetch the address account info (`number` and `sequence` to be used later)
+func (ctx *Client) setAccount() error {
+	if account, err := ctx.ReadAccount(); err != nil {
+		return err
+	} else {
+		ctx.account = account
+		return nil
+	}
 }
 
 func NewClient(options *Options) (*Client, error) {
@@ -90,7 +91,7 @@ func NewClient(options *Options) (*Client, error) {
 
 	ctx.setupLogger()
 
-	// Generate private key from mnemonic and compute address
+	// Generate private key from mnemonic
 	if err := ctx.setPrivateKey(); err != nil {
 		return nil, err
 	}
@@ -101,15 +102,9 @@ func NewClient(options *Options) (*Client, error) {
 	}
 
 	// Fetch the address account info (`number` and `sequence` to be used later)
-	if account, err := ctx.ReadAccount(); err != nil {
+	if err := ctx.setAccount(); err != nil {
 		return nil, err
-	} else {
-		ctx.account = account
 	}
-
-	// Send transactions
-	ctx.transactions = make(chan *Transaction, 1) // serial
-	go ctx.SendTransactions()
 
 	return ctx, nil
 }

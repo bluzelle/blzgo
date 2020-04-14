@@ -16,6 +16,8 @@ import (
 
 const TX_COMMAND string = "/txs"
 const TOKEN_NAME string = "ubnt"
+const BROADCAST_MAX_RETRIES = 10
+const BROADCAST_RETRY_INTERVAL time.Duration = time.Second
 
 //
 // JSON struct keys are ordered alphabetically
@@ -144,29 +146,7 @@ type Transaction struct {
 	ApiRequestEndpoint string
 	Client             *Client
 
-	done   chan bool
-	result []byte
-	err    error
-}
-
-func (transaction *Transaction) Done(result []byte, err error) {
-	transaction.result = result
-	transaction.err = err
-	transaction.done <- true
-	close(transaction.done)
-}
-
-func (transaction *Transaction) Send() {
-	payload, err := transaction.Validate()
-	if err != nil {
-		transaction.Done(nil, err)
-		return
-	}
-	b, err := transaction.Broadcast(payload)
-	if err == nil {
-		transaction.Client.account.Sequence += 1
-	}
-	transaction.Done(b, err)
+	broadcastRetries int
 }
 
 // Get required min gas
@@ -267,11 +247,39 @@ func (transaction *Transaction) Broadcast(txn *TransactionBroadcastPayload) ([]b
 		return nil, err
 	}
 	transaction.Client.Infof("txn broadcast response %+v", res)
-	if res.Code != 0 {
-		return nil, fmt.Errorf("%s", res.RawLog)
+
+	// https://github.com/bluzelle/blzjs/blob/45fe51f6364439fa88421987b833102cc9bcd7c0/src/swarmClient/cosmos.js#L240-L246
+	// note - as of right now (3/6/20) the responses returned by the Cosmos REST interface now look like this:
+	// success case: {"height":"0","txhash":"3F596D7E83D514A103792C930D9B4ED8DCF03B4C8FD93873AB22F0A707D88A9F","raw_log":"[]"}
+	// failure case: {"height":"0","txhash":"DEE236DEF1F3D0A92CB7EE8E442D1CE457EE8DB8E665BAC1358E6E107D5316AA","code":4,
+	//  "raw_log":"unauthorized: signature verification failed; verify correct account sequence and chain-id"}
+	//
+	// this is far from ideal, doesn't match their docs, and is probably going to change (again) in the future.
+
+	if res.Code == 0 {
+		transaction.Client.account.Sequence += 1
+		if res.Data == "" {
+			return []byte{}, nil
+		}
+		decodedData, err := hex.DecodeString(res.Data)
+		return decodedData, err
 	}
-	decodedData, err := hex.DecodeString(res.Data)
-	return decodedData, err
+	if strings.Contains(res.RawLog, "signature verification failed") {
+		transaction.broadcastRetries += 1
+		transaction.Client.Warnf("transaction failed ... retrying(%d) ...", transaction.broadcastRetries)
+		if transaction.broadcastRetries >= BROADCAST_MAX_RETRIES {
+			return nil, fmt.Errorf("transaction failed after max retry attempts")
+		}
+		time.Sleep(BROADCAST_RETRY_INTERVAL)
+		// Lookup changed sequence
+		if err := transaction.Client.setAccount(); err != nil {
+			return nil, err
+		}
+		b, err := transaction.Broadcast(txn)
+		return b, err
+	}
+
+	return nil, fmt.Errorf("%s", res.RawLog)
 }
 
 func (transaction *Transaction) Sign(req *TransactionBroadcastPayload) (string, error) {
@@ -279,10 +287,9 @@ func (transaction *Transaction) Sign(req *TransactionBroadcastPayload) (string, 
 		AccountNumber: strconv.Itoa(transaction.Client.account.AccountNumber),
 		ChainId:       transaction.Client.options.ChainId,
 		Sequence:      strconv.Itoa(transaction.Client.account.Sequence),
-
-		Memo: req.Memo,
-		Fee:  req.Fee, // already sorted by key
-		Msgs: req.Msg, // already sorted by key
+		Memo:          req.Memo,
+		Fee:           req.Fee,
+		Msgs:          req.Msg,
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {

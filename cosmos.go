@@ -49,16 +49,17 @@ func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]
 }
 
 func (ctx *Client) SendTransaction(transaction *Transaction) ([]byte, error) {
-	transaction.done = make(chan bool, 1)
-	ctx.transactions <- transaction
-	done := <-transaction.done
-	if !done {
-		ctx.Fatalf("txn did not complete") // todo: enqueue
+	payload, err := transaction.Validate()
+	if err != nil {
+		// ctx.Errorf("transaction err(%s)", err)
+		return nil, err
 	}
-	if transaction.err != nil {
-		ctx.Errorf("transaction err(%s)", transaction.err)
+	b, err := transaction.Broadcast(payload)
+	if err != nil {
+		// ctx.Errorf("transaction err(%s)", err)
+		return nil, err
 	}
-	return transaction.result, transaction.err
+	return b, nil
 }
 
 func parseResponse(res *http.Response) ([]byte, error) {
