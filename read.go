@@ -13,16 +13,21 @@ type ReadResponse struct {
 }
 
 func (ctx *Client) Read(key string) (string, error) {
-	value, err := ctx.ProvenRead(key, false)
-	return value, err
+	body, err := ctx.APIQuery("/crud/read/" + ctx.options.UUID + "/" + key)
+	if err != nil {
+		return "", err
+	}
+
+	res := &ReadResponse{}
+	err = json.Unmarshal(body, res)
+	if err != nil {
+		return "", err
+	}
+	return res.Result.Value, nil
 }
 
-func (ctx *Client) ProvenRead(key string, prove bool) (string, error) {
-	path := "read"
-	if prove {
-		path = "pread"
-	}
-	body, err := ctx.APIQuery("/crud/" + path + "/" + ctx.options.UUID + "/" + key)
+func (ctx *Client) ProvenRead(key string) (string, error) {
+	body, err := ctx.APIQuery("/crud/pread/" + ctx.options.UUID + "/" + key)
 	if err != nil {
 		return "", err
 	}
