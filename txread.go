@@ -9,7 +9,6 @@ func (ctx *Client) TxRead(key string) (string, error) {
 		Key:                key,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/read",
-		Client:             ctx,
 	}
 
 	body, err := ctx.SendTransaction(transaction)

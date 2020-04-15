@@ -9,7 +9,6 @@ func (ctx *Client) TxHas(key string) (bool, error) {
 		Key:                key,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/has",
-		Client:             ctx,
 	}
 
 	body, err := ctx.SendTransaction(transaction)

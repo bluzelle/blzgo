@@ -5,7 +5,6 @@ func (ctx *Client) MultiUpdate(keyValues []*KeyValue) error {
 		KeyValues:          keyValues,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/multiupdate",
-		Client:             ctx,
 	}
 
 	_, err := ctx.SendTransaction(transaction)

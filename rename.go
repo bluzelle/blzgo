@@ -6,7 +6,6 @@ func (ctx *Client) Rename(key string, newKey string) error {
 		NewKey:             newKey,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/rename",
-		Client:             ctx,
 	}
 
 	_, err := ctx.SendTransaction(transaction)

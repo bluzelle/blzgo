@@ -5,7 +5,6 @@ func (ctx *Client) Delete(key string) error {
 		Key:                key,
 		ApiRequestMethod:   "DELETE",
 		ApiRequestEndpoint: "/crud/delete",
-		Client:             ctx,
 	}
 
 	_, err := ctx.SendTransaction(transaction)

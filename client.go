@@ -21,10 +21,11 @@ type Options struct {
 }
 
 type Client struct {
-	options    *Options
-	account    *Account
-	logger     *log.Entry
-	privateKey *btcec.PrivateKey
+	options          *Options
+	account          *Account
+	logger           *log.Entry
+	privateKey       *btcec.PrivateKey
+	broadcastRetries int
 }
 
 func (root *Client) UUID(uuid string) *Client {

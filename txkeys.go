@@ -8,7 +8,6 @@ func (ctx *Client) TxKeys() ([]string, error) {
 	transaction := &Transaction{
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/keys",
-		Client:             ctx,
 	}
 
 	body, err := ctx.SendTransaction(transaction)

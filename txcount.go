@@ -9,7 +9,6 @@ func (ctx *Client) TxCount() (int, error) {
 	transaction := &Transaction{
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/count",
-		Client:             ctx,
 	}
 
 	body, err := ctx.SendTransaction(transaction)

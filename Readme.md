@@ -63,7 +63,7 @@ func main() {
 
 You can test out the `examples/` included by:
 
-1. Coping `.env.sample` file to `.env` to configure the environment and then updating the resulting file, `.env`, accordingly. You can find test settings documented in the [Bluzelle getting started tutorial](https://docs.bluzelle.com/developers/bluzelle-db/getting-started-with-testnet).
+1. Coping `.env.sample` file to `.env` to configure the environment and then updating the resulting file, `.env`, accordingly. You can also use this test [file](https://gist.github.com/vbstreetz/f05a982530311d155836e27d41c1f73a)
 
 2. Install dependencies:
 ```
