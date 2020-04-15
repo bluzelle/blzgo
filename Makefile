@@ -18,7 +18,7 @@ make keys\n\
 make keyvalues\n\
 make count\n\
 make getlease key=foo\n\
-make getnshortestleases n=1\n\
+make getnshortestleases n=2\n\
 \n\
 make txread key=foo prove=true\n\
 make txhas key=foo\n\
@@ -26,6 +26,7 @@ make txkeys\n\
 make txkeyvalues\n\
 make txcount\n\
 make txgetlease key=foo\n\
+make txgetnshortestleases n=2\n\
 \n\
 make account\n\
 make version\n\
@@ -86,6 +87,9 @@ txcount:
 txgetlease:
 	@go run examples/crud/$@/*.go $(KEY)
 
+txgetnshortestleases:
+	@go run examples/crud/$@/*.go $(N)
+
 #
 
 deleteall:
@@ -134,6 +138,7 @@ fmt:
 	account \
 	multiupdate \
 	deleteall \
+	txgetnshortestleases \
 	txgetlease \
 	txcount \
 	txkeyvalues \

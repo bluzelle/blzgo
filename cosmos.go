@@ -75,11 +75,13 @@ type TransactionSignature struct {
 //
 
 type Transaction struct {
-	Key                string
-	Value              string
-	KeyValues          []*KeyValue
-	NewKey             string
-	Lease              int64
+	Key       string
+	KeyValues []*KeyValue
+	Lease     int64
+	N         uint64
+	NewKey    string
+	Value     string
+
 	ApiRequestMethod   string
 	ApiRequestEndpoint string
 }
@@ -92,6 +94,7 @@ type TransactionValidateRequest struct {
 	Key       string                             `json:"Key,omitempty"`
 	KeyValues []*KeyValue                        `json:"KeyValues,omitempty"`
 	Lease     string                             `json:"Lease,omitempty"`
+	N         string                             `json:"N,omitempty"`
 	NewKey    string                             `json:"NewKey,omitempty"`
 	Value     string                             `json:"Value,omitempty"`
 	Owner     string                             `json:"Owner"`
@@ -130,6 +133,7 @@ type TransactionMsgValue struct {
 	Key       string      `json:"Key,omitempty"`
 	KeyValues []*KeyValue `json:"KeyValues,omitempty"`
 	Lease     string      `json:"Lease,omitempty"`
+	N         string      `json:"N,omitempty"`
 	NewKey    string      `json:"NewKey,omitempty"`
 	Owner     string      `json:"Owner"`
 	UUID      string      `json:"UUID"`
@@ -223,6 +227,7 @@ func (ctx *Client) ValidateTransaction(txn *Transaction) (*TransactionBroadcastP
 		Key:       txn.Key,
 		KeyValues: txn.KeyValues,
 		Lease:     strconv.FormatInt(txn.Lease, 10),
+		N:         strconv.FormatUint(txn.N, 10),
 		NewKey:    txn.NewKey,
 		Owner:     ctx.options.Address,
 		Value:     txn.Value,
