@@ -3,6 +3,7 @@ VALUE=$(value)
 NEW_KEY=$(newkey)
 PROVE=$(prove)
 LEASE=$(lease)
+N=$(n)
 
 help:
 	@echo "\n\
@@ -17,6 +18,7 @@ make keys\n\
 make keyvalues\n\
 make count\n\
 make getlease key=foo\n\
+make getnshortestleases n=1\n\
 \n\
 make txread key=foo prove=true\n\
 make txhas key=foo\n\
@@ -60,6 +62,9 @@ count:
 
 getlease:
 	@go run examples/crud/$@/*.go $(KEY)
+
+getnshortestleases:
+	@go run examples/crud/$@/*.go $(N)
 
 #
 
@@ -135,6 +140,7 @@ fmt:
 	txkeys \
 	txhas \
 	txread \
+	getnshortestleases \
 	getlease \
 	count \
 	keyvalues \

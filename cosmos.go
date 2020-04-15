@@ -35,6 +35,11 @@ type KeyValue struct {
 	Value string `json:"value,omitempty"`
 }
 
+type KeyLease struct {
+	Key   string `json:"key,omitempty"`
+	Lease string `json:"lease,omitempty"`
+}
+
 type GasInfo struct {
 	MaxGas   int
 	MaxFee   int
