@@ -11,7 +11,10 @@ make create key=foo value=bar lease=0\n\
 make update key=foo value=bar lease=0\n\
 make delete key=foo\n\
 make rename key=foo newkey=baz\n\
+make deleteall\n\
+make multiupdate\n\
 make renewlease key=foo lease=0\n\
+make renewleaseall lease=0\n\
 \n\
 make read key=foo prove=true\n\
 make has key=foo\n\
@@ -45,8 +48,17 @@ delete:
 rename:
 	@go run examples/crud/$@/*.go $(KEY) $(NEW_KEY)
 
+deleteall:
+	@go run examples/crud/$@/*.go
+
+multiupdate:
+	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
+
 renewlease:
 	@go run examples/crud/$@/*.go $(KEY) $(LEASE)
+
+renewleaseall:
+	@go run examples/crud/$@/*.go $(LEASE)
 
 #
 
@@ -96,14 +108,6 @@ txgetnshortestleases:
 
 #
 
-deleteall:
-	@go run examples/crud/$@/*.go
-
-multiupdate:
-	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
-
-#
-
 account:
 	@go run examples/crud/$@/*.go
 
@@ -132,33 +136,34 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt \
-	test \
-	pkgs \
-	uuid \
-	multi \
-	hello_world \
-	version \
-	account \
-	multiupdate \
-	deleteall \
-	txgetnshortestleases \
-	txgetlease \
-	txcount \
-	txkeyvalues \
-	txkeys \
-	txhas \
-	txread \
-	getnshortestleases \
-	getlease \
-	count \
-	keyvalues \
-	keys \
-	has \
-	read \
-	renewlease \
-	rename \
-	delete \
-	update \
+.PHONY: help \
 	create \
-	help
+	update \
+	delete \
+	rename \
+	deleteall \
+	multiupdate \
+	renewlease \
+	renewleaseall \
+	read \
+	has \
+	keys \
+	keyvalues \
+	count \
+	getlease \
+	getnshortestleases \
+	txread \
+	txhas \
+	txkeys \
+	txkeyvalues \
+	txcount \
+	txgetlease \
+	txgetnshortestleases \
+	account \
+	version \
+	hello_world \
+	multi \
+	uuid \
+	pkgs \
+	test \
+	fmt
