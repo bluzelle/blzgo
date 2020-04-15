@@ -11,6 +11,7 @@ make create key=foo value=bar lease=0\n\
 make update key=foo value=bar lease=0\n\
 make delete key=foo\n\
 make rename key=foo newkey=baz\n\
+make renewlease key=foo lease=0\n\
 \n\
 make read key=foo prove=true\n\
 make has key=foo\n\
@@ -43,6 +44,9 @@ delete:
 
 rename:
 	@go run examples/crud/$@/*.go $(KEY) $(NEW_KEY)
+
+renewlease:
+	@go run examples/crud/$@/*.go $(KEY) $(LEASE)
 
 #
 
@@ -152,6 +156,7 @@ fmt:
 	keys \
 	has \
 	read \
+	renewlease \
 	rename \
 	delete \
 	update \
