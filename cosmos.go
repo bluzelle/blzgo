@@ -74,6 +74,7 @@ type Transaction struct {
 	Value              string
 	KeyValues          []*KeyValue
 	NewKey             string
+	Lease              int
 	ApiRequestMethod   string
 	ApiRequestEndpoint string
 }
@@ -85,6 +86,7 @@ type TransactionValidateRequest struct {
 	UUID      string                             `json:"UUID"`
 	Key       string                             `json:"Key,omitempty"`
 	KeyValues []*KeyValue                        `json:"KeyValues,omitempty"`
+	Lease     string                             `json:"Lease,omitempty"`
 	NewKey    string                             `json:"NewKey,omitempty"`
 	Value     string                             `json:"Value,omitempty"`
 	Owner     string                             `json:"Owner"`
@@ -122,6 +124,7 @@ type TransactionBroadcastResponse struct {
 type TransactionMsgValue struct {
 	Key       string      `json:"Key,omitempty"`
 	KeyValues []*KeyValue `json:"KeyValues,omitempty"`
+	Lease     string      `json:"Lease,omitempty"`
 	NewKey    string      `json:"NewKey,omitempty"`
 	Owner     string      `json:"Owner"`
 	UUID      string      `json:"UUID"`
@@ -214,9 +217,10 @@ func (ctx *Client) ValidateTransaction(txn *Transaction) (*TransactionBroadcastP
 		UUID:      ctx.options.UUID,
 		Key:       txn.Key,
 		KeyValues: txn.KeyValues,
-		NewKey:    txn.NewKey,
-		Owner:     ctx.options.Address,
-		Value:     txn.Value,
+		// Lease:     txn.Lease,
+		NewKey: txn.NewKey,
+		Owner:  ctx.options.Address,
+		Value:  txn.Value,
 	}
 
 	reqBytes, err := json.Marshal(req)
