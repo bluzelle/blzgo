@@ -23,6 +23,7 @@ make txhas key=foo\n\
 make txkeys\n\
 make txkeyvalues\n\
 make txcount\n\
+make txgetlease key=foo\n\
 \n\
 make account\n\
 make version\n\
@@ -77,6 +78,9 @@ txkeyvalues:
 txcount:
 	@go run examples/crud/$@/*.go
 
+txgetlease:
+	@go run examples/crud/$@/*.go $(KEY)
+
 #
 
 deleteall:
@@ -125,6 +129,7 @@ fmt:
 	account \
 	multiupdate \
 	deleteall \
+	txgetlease \
 	txcount \
 	txkeyvalues \
 	txkeys \
