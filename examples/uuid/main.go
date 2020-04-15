@@ -23,16 +23,17 @@ func main() {
 	uuid2 := uuid1.UUID("my-different-uuid")
 	key := fmt.Sprintf("%s", strconv.FormatInt(time.Now().Unix(), 10))
 	value := "bar"
+	lease := 0
 
 	log.Infof("creating key(%s), value(%s)", key, value)
-	if err := uuid1.Create(key, value); err != nil {
+	if err := uuid1.Create(key, value, lease); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("created key for uuid1")
 	}
 
 	log.Infof("creating key(%s), value(%s)", key, value)
-	if err := uuid2.Create(key, value); err != nil {
+	if err := uuid2.Create(key, value, lease); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("created key for uuid2")

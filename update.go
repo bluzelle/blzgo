@@ -1,9 +1,10 @@
 package bluzelle
 
-func (ctx *Client) Update(key string, value string) error {
+func (ctx *Client) Update(key string, value string, lease int64) error {
 	transaction := &Transaction{
 		Key:                key,
 		Value:              value,
+		Lease:              lease,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/update",
 	}

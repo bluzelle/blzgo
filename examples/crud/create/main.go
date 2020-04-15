@@ -4,6 +4,7 @@ import (
 	"github.com/apex/log"
 	"github.com/vbstreetz/blzgo/examples/util"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -22,10 +23,19 @@ func main() {
 
 	key := args[0]
 	value := args[1]
+	lease := 0
 
-	log.Infof("creating key(%s), val(%s)...", key, value)
+	if len(args) > 2 {
+		if l, err := strconv.Atoi(args[2]); err != nil {
+			log.Fatalf("could not parse provided lease(%s)", args[2])
+		} else {
+			lease = l
+		}
+	}
 
-	if err := ctx.Create(key, value); err != nil {
+	log.Infof("creating key(%s), val(%s), lease(%d)...", key, value, lease)
+
+	if err := ctx.Create(key, value, int64(lease)); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("created key")

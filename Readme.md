@@ -37,7 +37,7 @@ func main() {
   value := "bar"
 
   // create key
-  if err := client.Create(key, value); err != nil {
+  if err := client.Create(key, value, 0); err != nil {
     log.Fatalf("%s", err)
   } else {
     log.Printf("create key success: true\n")

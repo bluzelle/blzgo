@@ -2,11 +2,12 @@ KEY=$(key)
 VALUE=$(value)
 NEW_KEY=$(newkey)
 PROVE=$(prove)
+LEASE=$(lease)
 
 help:
 	@echo "\n\
-make create key=foo value=bar\n\
-make update key=foo value=bar\n\
+make create key=foo value=bar lease=0\n\
+make update key=foo value=bar lease=0\n\
 make delete key=foo\n\
 make rename key=foo newkey=baz\n\
 \n\
@@ -15,6 +16,7 @@ make has key=foo\n\
 make keys\n\
 make keyvalues\n\
 make count\n\
+make getlease key=foo\n\
 \n\
 make txread key=foo prove=true\n\
 make txhas key=foo\n\
@@ -27,10 +29,10 @@ make version\n\
 "
 
 create:
-	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
+	@go run examples/crud/$@/*.go $(KEY) $(VALUE) $(LEASE)
 
 update:
-	@go run examples/crud/$@/*.go $(KEY) $(VALUE)
+	@go run examples/crud/$@/*.go $(KEY) $(VALUE) $(LEASE)
 
 delete:
 	@go run examples/crud/$@/*.go $(KEY)
@@ -54,6 +56,9 @@ keyvalues:
 
 count:
 	@go run examples/crud/$@/*.go
+
+getlease:
+	@go run examples/crud/$@/*.go $(KEY)
 
 #
 
@@ -110,4 +115,29 @@ fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**/*.go
 
-.PHONY: fmt test pkgs uuid multi hello_world version account multiupdate deleteall txcount txkeyvalues txkeys txhas txread count keyvalues keys has read rename delete update create help
+.PHONY: fmt \
+	test \
+	pkgs \
+	uuid \
+	multi \
+	hello_world \
+	version \
+	account \
+	multiupdate \
+	deleteall \
+	txcount \
+	txkeyvalues \
+	txkeys \
+	txhas \
+	txread \
+	getlease \
+	count \
+	keyvalues \
+	keys \
+	has \
+	read \
+	rename \
+	delete \
+	update \
+	create \
+	help
