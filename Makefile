@@ -4,6 +4,7 @@ NEW_KEY=$(newkey)
 PROVE=$(prove)
 LEASE=$(lease)
 N=$(n)
+test=$(o)
 
 help:
 	@echo "\n\
@@ -131,6 +132,9 @@ pkgs:
 test:
 	@go test . -test.v
 #	@./test.sh
+
+test-method:
+	@go test . -test.v -run 'Test$(o)'
 
 fmt:
 	@gofmt -w *.go
