@@ -2,15 +2,14 @@ package main
 
 import (
 	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo/examples/util"
+	util "github.com/vbstreetz/blzgo"
 )
 
 func main() {
 	util.SetupLogging()
 	util.LoadEnv()
 
-
-	ctx, err := util.NewClient()
+	ctx, err := util.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}

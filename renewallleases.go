@@ -1,6 +1,6 @@
 package bluzelle
 
-func (ctx *Client) RenewLeaseAll(lease int64) error {
+func (ctx *Client) RenewAllLeases(lease int64) error {
 	transaction := &Transaction{
 		Lease:              lease,
 		ApiRequestMethod:   "POST",

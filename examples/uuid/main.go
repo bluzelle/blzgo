@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo/examples/util"
+	util "github.com/vbstreetz/blzgo"
 	"strconv"
 	"time"
 )
@@ -15,7 +15,7 @@ func main() {
 	util.SetupLogging()
 	util.LoadEnv()
 
-	uuid1, err := util.NewClient()
+	uuid1, err := util.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
@@ -23,7 +23,7 @@ func main() {
 	uuid2 := uuid1.UUID("my-different-uuid")
 	key := fmt.Sprintf("%s", strconv.FormatInt(time.Now().Unix(), 10))
 	value := "bar"
-	lease := 0
+	lease := int64(0)
 
 	log.Infof("creating key(%s), value(%s)", key, value)
 	if err := uuid1.Create(key, value, lease); err != nil {

@@ -261,7 +261,7 @@ func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload) ([]byt
 	// Set fee
 	feeGas, err := strconv.Atoi(txn.Fee.Gas)
 	if err != nil {
-		ctx.Errorf("failed to pass gas to int(%)", txn.Fee.Gas)
+		ctx.Errorf("failed to pass gas to int(%s)", txn.Fee.Gas)
 	}
 	gasInfo := ctx.options.GasInfo
 	if gasInfo.MaxGas != 0 && feeGas > gasInfo.MaxGas {

@@ -14,7 +14,7 @@ make rename key=foo newkey=baz\n\
 make deleteall\n\
 make multiupdate\n\
 make renewlease key=foo lease=0\n\
-make renewleaseall lease=0\n\
+make renewallleases lease=0\n\
 \n\
 make read key=foo prove=true\n\
 make has key=foo\n\
@@ -57,7 +57,7 @@ multiupdate:
 renewlease:
 	@go run examples/crud/$@/*.go $(KEY) $(LEASE)
 
-renewleaseall:
+renewallleases:
 	@go run examples/crud/$@/*.go $(LEASE)
 
 #
@@ -129,12 +129,12 @@ pkgs:
 	@dep ensure
 
 test:
-#	@go test . -test.v
-	@./test.sh
+	@go test . -test.v
+#	@./test.sh
 
 fmt:
 	@gofmt -w *.go
-	@gofmt -w examples/**/*.go
+	@gofmt -w examples/**
 
 .PHONY: help \
 	create \
@@ -144,7 +144,7 @@ fmt:
 	deleteall \
 	multiupdate \
 	renewlease \
-	renewleaseall \
+	renewallleases \
 	read \
 	has \
 	keys \

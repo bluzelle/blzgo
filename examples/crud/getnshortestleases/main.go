@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo/examples/util"
+	util "github.com/vbstreetz/blzgo"
 	"os"
 	"strconv"
 )
@@ -16,7 +16,7 @@ func main() {
 		log.Fatalf("n is required")
 	}
 
-	ctx, err := util.NewClient()
+	ctx, err := util.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo/examples/util"
+	util "github.com/vbstreetz/blzgo"
 	"strconv"
 	"time"
 )
@@ -16,7 +16,7 @@ func main() {
 	util.SetupLogging()
 	util.LoadEnv()
 
-	ctx, err := util.NewClient()
+	ctx, err := util.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
