@@ -178,7 +178,7 @@ func (ctx *Client) APIQuery(endpoint string) ([]byte, error) {
 	defer res.Body.Close()
 
 	body, err := parseResponse(res)
-	return body, nil
+	return body, err
 }
 
 func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]byte, error) {
@@ -198,7 +198,7 @@ func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]
 	defer res.Body.Close()
 
 	body, err := parseResponse(res)
-	return body, nil
+	return body, err
 }
 
 func (ctx *Client) SendTransaction(txn *Transaction) ([]byte, error) {

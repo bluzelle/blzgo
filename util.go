@@ -32,7 +32,7 @@ func (ctx *Test) SetUp() error {
 
 	ctx.Key1 = strconv.FormatInt(100+time.Now().Unix(), 10)
 	ctx.Key2 = strconv.FormatInt(200+time.Now().Unix(), 10)
-	ctx.Key3 = strconv.FormatInt(200+time.Now().Unix(), 10)
+	ctx.Key3 = strconv.FormatInt(300+time.Now().Unix(), 10)
 
 	ctx.Value1 = "foo"
 	ctx.Value2 = "bar"
