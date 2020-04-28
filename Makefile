@@ -35,6 +35,12 @@ make txgetnshortestleases n=2\n\
 \n\
 make account\n\
 make version\n\
+\n\
+make hello_world\n\
+make multi\n\
+make uuid\n\
+\n\
+make test\n\
 "
 
 create:
