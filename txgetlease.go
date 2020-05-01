@@ -24,5 +24,5 @@ func (ctx *Client) TxGetLease(key string, gasInfo *GasInfo) (int64, error) {
 		return 0, err
 	}
 	lease, err := strconv.Atoi(res.Lease)
-	return int64(lease), err
+	return int64(lease * BLOCK_TIME_IN_SECONDS), err
 }

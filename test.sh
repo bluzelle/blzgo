@@ -1,3 +1,5 @@
+set -e # terminate if any command fails
+
 key1=`date +%s`
 
 make create key=$key1 value=1

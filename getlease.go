@@ -26,5 +26,5 @@ func (ctx *Client) GetLease(key string) (int64, error) {
 	}
 
 	lease, err := strconv.Atoi(res.Result.Lease)
-	return int64(lease), err
+	return int64(lease * BLOCK_TIME_IN_SECONDS), err
 }

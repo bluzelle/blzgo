@@ -2,21 +2,21 @@ package main
 
 import (
 	"github.com/apex/log"
-	util "github.com/vbstreetz/blzgo"
+	"github.com/vbstreetz/blzgo"
 	"os"
 	"strconv"
 )
 
 func main() {
-	util.SetupLogging()
-	util.LoadEnv()
+	bluzelle.SetupLogging()
+	bluzelle.LoadEnv()
 
 	args := os.Args[1:]
 	if len(args) == 0 {
 		log.Fatalf("key is required")
 	}
 
-	ctx, err := util.NewTestClient()
+	ctx, err := bluzelle.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}

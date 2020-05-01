@@ -3,22 +3,21 @@ package main
 import (
 	"github.com/apex/log"
 	"github.com/vbstreetz/blzgo"
-	util "github.com/vbstreetz/blzgo"
 	"strconv"
 	"time"
 	// "os"
 )
 
 func main() {
-	util.SetupLogging()
-	util.LoadEnv()
+	bluzelle.SetupLogging()
+	bluzelle.LoadEnv()
 
 	// args := os.Args[1:]
 	// if len(args) == 0 {
 	// 	log.Fatalf("at least one key=value pair is required")
 	// }
 
-	ctx, err := util.NewTestClient()
+	ctx, err := bluzelle.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}

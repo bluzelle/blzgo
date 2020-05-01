@@ -2,21 +2,21 @@ package main
 
 import (
 	"github.com/apex/log"
-	util "github.com/vbstreetz/blzgo"
+	"github.com/vbstreetz/blzgo"
 )
 
 func main() {
-	util.SetupLogging()
-	util.LoadEnv()
+	bluzelle.SetupLogging()
+	bluzelle.LoadEnv()
 
-	ctx, err := util.NewTestClient()
+	ctx, err := bluzelle.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
 
 	log.Infof("getting keys...")
 
-	if v, err := ctx.TxKeys(); err != nil {
+	if v, err := ctx.TxKeys(nil); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("keys(%+v)", v)

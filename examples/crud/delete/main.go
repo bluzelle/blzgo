@@ -2,20 +2,20 @@ package main
 
 import (
 	"github.com/apex/log"
-	util "github.com/vbstreetz/blzgo"
+	"github.com/vbstreetz/blzgo"
 	"os"
 )
 
 func main() {
-	util.SetupLogging()
-	util.LoadEnv()
+	bluzelle.SetupLogging()
+	bluzelle.LoadEnv()
 
 	args := os.Args[1:]
 	if len(args) == 0 {
 		log.Fatalf("key is required")
 	}
 
-	ctx, err := util.NewTestClient()
+	ctx, err := bluzelle.NewTestClient()
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
@@ -24,7 +24,7 @@ func main() {
 
 	log.Infof("deleting key(%s)...", key)
 
-	if err := ctx.Delete(key); err != nil {
+	if err := ctx.Delete(key, nil); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("deleted key")

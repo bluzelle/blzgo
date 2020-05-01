@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-func (ctx *Client) TxGetNShortestLeases(n uint64, gasInfo *GasInfo) ([]*KeyLease, error) {
+func (ctx *Client) TxGetNShortestLeases(n uint64, gasInfo *GasInfo) ([]*GetNShortestLeasesResponseResultKeyLease, error) {
 	transaction := &Transaction{
 		N:                  n,
 		ApiRequestMethod:   "POST",
@@ -18,9 +18,10 @@ func (ctx *Client) TxGetNShortestLeases(n uint64, gasInfo *GasInfo) ([]*KeyLease
 	}
 
 	res := &GetNShortestLeasesResponseResult{}
-	err = json.Unmarshal(body, res)
-	if err != nil {
+	if err := json.Unmarshal(body, res); err != nil {
 		return nil, err
 	}
-	return res.KeyLeases, nil
+
+	kl, err := res.GetHumanizedKeyLeases()
+	return kl, err
 }
