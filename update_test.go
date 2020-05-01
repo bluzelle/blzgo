@@ -7,20 +7,20 @@ import (
 
 func TestUpdate(t *testing.T) {
 	ctx := &Test{}
-	if err := ctx.SetUp(); err != nil {
+	if err := ctx.TestSetUp(); err != nil {
 		t.Fatalf("%s", err)
 	}
-	defer ctx.TearDown()
+	defer ctx.TestTearDown()
 
 	assert := assert.New(t)
 
 	// create key
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, 0); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, 0, nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
 	// update key
-	if err := ctx.Client.Update(ctx.Key1, ctx.Value2, 0); err != nil {
+	if err := ctx.Client.Update(ctx.Key1, ctx.Value2, 0, nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 

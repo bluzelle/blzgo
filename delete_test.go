@@ -7,14 +7,14 @@ import (
 
 func TestDelete(t *testing.T) {
 	ctx := &Test{}
-	if err := ctx.SetUp(); err != nil {
+	if err := ctx.TestSetUp(); err != nil {
 		t.Fatalf("%s", err)
 	}
-	defer ctx.TearDown()
+	defer ctx.TestTearDown()
 
 	assert := assert.New(t)
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, 0); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, 0, nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -24,7 +24,7 @@ func TestDelete(t *testing.T) {
 		assert.Equal(b, true)
 	}
 
-	if err := ctx.Client.Delete(ctx.Key1); err != nil {
+	if err := ctx.Client.Delete(ctx.Key1, nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 

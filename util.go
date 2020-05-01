@@ -19,7 +19,7 @@ type Test struct {
 	Value3 string
 }
 
-func (ctx *Test) SetUp() error {
+func (ctx *Test) TestSetUp() error {
 	SetupLogging()
 	LoadEnv()
 
@@ -41,7 +41,7 @@ func (ctx *Test) SetUp() error {
 	return nil
 }
 
-func (ctx *Test) TearDown() error {
+func (ctx *Test) TestTearDown() error {
 	return nil
 }
 

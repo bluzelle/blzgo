@@ -84,6 +84,7 @@ type Transaction struct {
 
 	ApiRequestMethod   string
 	ApiRequestEndpoint string
+	GasInfo            *GasInfo
 }
 
 //
@@ -208,7 +209,7 @@ func (ctx *Client) SendTransaction(txn *Transaction) ([]byte, error) {
 		// ctx.Errorf("txn err(%s)", err)
 		return nil, err
 	}
-	b, err := ctx.BroadcastTransaction(payload)
+	b, err := ctx.BroadcastTransaction(payload, txn.GasInfo)
 	if err != nil {
 		// ctx.Errorf("txn err(%s)", err)
 		return nil, err
@@ -254,7 +255,7 @@ func (ctx *Client) ValidateTransaction(txn *Transaction) (*TransactionBroadcastP
 	return res.Value, nil
 }
 
-func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload) ([]byte, error) {
+func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, txGasInfo *GasInfo) ([]byte, error) {
 	// Set memo
 	txn.Memo = makeRandomString(32)
 
@@ -263,7 +264,13 @@ func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload) ([]byt
 	if err != nil {
 		ctx.Errorf("failed to pass gas to int(%s)", txn.Fee.Gas)
 	}
-	gasInfo := ctx.options.GasInfo
+
+	var gasInfo GasInfo
+	if txGasInfo == nil {
+		gasInfo = *ctx.options.GasInfo // clone
+	} else {
+		gasInfo = *txGasInfo
+	}
 	if gasInfo.MaxGas != 0 && feeGas > gasInfo.MaxGas {
 		txn.Fee.Gas = strconv.Itoa(gasInfo.MaxGas)
 	}
@@ -344,7 +351,7 @@ func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload) ([]byt
 		if err := ctx.setAccount(); err != nil {
 			return nil, err
 		}
-		b, err := ctx.BroadcastTransaction(txn)
+		b, err := ctx.BroadcastTransaction(txn, &gasInfo)
 		return b, err
 	}
 

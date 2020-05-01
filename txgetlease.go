@@ -5,11 +5,12 @@ import (
 	"strconv"
 )
 
-func (ctx *Client) TxGetLease(key string) (int64, error) {
+func (ctx *Client) TxGetLease(key string, gasInfo *GasInfo) (int64, error) {
 	transaction := &Transaction{
 		Key:                key,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/getlease",
+		GasInfo:            gasInfo,
 	}
 
 	body, err := ctx.SendTransaction(transaction)

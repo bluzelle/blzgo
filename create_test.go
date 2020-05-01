@@ -6,13 +6,13 @@ import (
 
 func TestCreate(t *testing.T) {
 	ctx := &Test{}
-	if err := ctx.SetUp(); err != nil {
+	if err := ctx.TestSetUp(); err != nil {
 		t.Fatalf("%s", err)
 	}
-	defer ctx.TearDown()
+	defer ctx.TestTearDown()
 
 	// create key
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, 0); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, 0, nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 }

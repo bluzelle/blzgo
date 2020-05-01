@@ -1,10 +1,11 @@
 package bluzelle
 
-func (ctx *Client) Delete(key string) error {
+func (ctx *Client) Delete(key string, gasInfo *GasInfo) error {
 	transaction := &Transaction{
 		Key:                key,
 		ApiRequestMethod:   "DELETE",
 		ApiRequestEndpoint: "/crud/delete",
+		GasInfo:            gasInfo,
 	}
 
 	_, err := ctx.SendTransaction(transaction)
