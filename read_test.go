@@ -15,7 +15,7 @@ func TestRead(t *testing.T) {
 	assert := assert.New(t)
 
 	// create key
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, 0, nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, nil, nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 

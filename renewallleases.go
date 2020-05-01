@@ -1,8 +1,16 @@
 package bluzelle
 
-func (ctx *Client) RenewAllLeases(lease int64, gasInfo *GasInfo) error {
+import (
+	"fmt"
+)
+
+func (ctx *Client) RenewAllLeases(leaseInfo *LeaseInfo, gasInfo *GasInfo) error {
+	if leaseInfo == nil {
+		return fmt.Errorf("lease is required")
+	}
+
 	transaction := &Transaction{
-		Lease:              lease,
+		Lease:              leaseInfo.ToBlocks(),
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/renewleaseall",
 		GasInfo:            gasInfo,

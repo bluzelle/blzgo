@@ -1,6 +1,11 @@
 package bluzelle
 
-func (ctx *Client) Update(key string, value string, lease int64, gasInfo *GasInfo) error {
+func (ctx *Client) Update(key string, value string, leaseInfo *LeaseInfo, gasInfo *GasInfo) error {
+	var lease int64
+	if leaseInfo != nil {
+		lease = leaseInfo.ToBlocks()
+	}
+
 	transaction := &Transaction{
 		Key:                key,
 		Value:              value,

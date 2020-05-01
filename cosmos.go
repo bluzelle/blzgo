@@ -17,10 +17,11 @@ import (
 	"time"
 )
 
-const TX_COMMAND string = "/txs"
-const TOKEN_NAME string = "ubnt"
+const TX_COMMAND = "/txs"
+const TOKEN_NAME = "ubnt"
 const BROADCAST_MAX_RETRIES = 10
-const BROADCAST_RETRY_INTERVAL time.Duration = time.Second
+const BROADCAST_RETRY_INTERVAL = time.Second
+const BLOCK_TIME_IN_SECONDS = 5
 
 //
 // JSON struct keys are ordered alphabetically
@@ -44,6 +45,22 @@ type GasInfo struct {
 	MaxGas   int
 	MaxFee   int
 	GasPrice int
+}
+
+type LeaseInfo struct {
+	Days    int64
+	Hours   int64
+	Minutes int64
+	Seconds int64
+}
+
+func (lease *LeaseInfo) ToBlocks() int64 {
+	var seconds int64
+	seconds += lease.Days * 24 * 60 * 60
+	seconds += lease.Hours * 60 * 60
+	seconds += lease.Minutes * 60
+	seconds += lease.Seconds
+	return seconds / BLOCK_TIME_IN_SECONDS
 }
 
 //
