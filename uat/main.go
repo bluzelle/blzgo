@@ -45,13 +45,22 @@ func uat(w http.ResponseWriter, r *http.Request) {
 	switch request.Method {
 	case "read":
 		if len(request.Args) != 1 {
-			http.Error(w, fmt.Sprintf("Invalid number of keys passed: %+v", request.Args), 500)
+			http.Error(w, fmt.Sprintf("invalid number of keys passed: %+v", request.Args), 500)
 			return
 		}
 		if v, err := ctx.Read(request.Args[0]); err != nil {
 			http.Error(w, fmt.Sprintf("%s", err), 500)
 		} else {
 			fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+		}
+
+	case "create":
+		if len(request.Args) < 2 {
+			http.Error(w, fmt.Sprintf("both key and value are required"), 500)
+			return
+		}
+		if err := ctx.Create(request.Args[0], request.Args[1], nil, nil); err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), 500)
 		}
 
 	default:
