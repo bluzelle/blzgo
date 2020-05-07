@@ -145,6 +145,10 @@ test-method:
 fmt:
 	@gofmt -w *.go
 	@gofmt -w examples/**
+	@gofmt -w uat/**
+
+uat:
+	@go run uat/*.go
 
 .PHONY: help \
 	create \
@@ -176,4 +180,5 @@ fmt:
 	uuid \
 	pkgs \
 	test \
-	fmt
+	fmt \
+	uat

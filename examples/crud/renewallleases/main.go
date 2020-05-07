@@ -30,7 +30,7 @@ func main() {
 
 	log.Infof("renewing lease(%ds)...", leaseInfo.ToBlocks())
 
-	if err := ctx.RenewAllLeases(leaseInfo); err != nil {
+	if err := ctx.RenewAllLeases(leaseInfo, nil); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("renewed leases")
