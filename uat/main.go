@@ -122,11 +122,24 @@ func uat(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "multi_update":
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 2); err != nil {
+		keyValues := []*bluzelle.KeyValue{}
+		for i := 0; i < ((len(request.Args) / 2) * 2); i = i + 2 {
+			keyValues = append(keyValues, &bluzelle.KeyValue{
+				Key:   request.Args[i].(string),
+				Value: request.Args[i+1].(string),
+			})
+		}
+
+		gasInfoIndex := len(request.Args)
+		if gasInfoIndex%2 == 0 {
+			gasInfoIndex = -1
+		}
+
+		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, gasInfoIndex); err != nil {
 			abort(w, err)
 			return
 		} else {
-			if err := ctx.Rename(request.Args[0].(string), request.Args[1].(string), gasInfo); err != nil {
+			if err := ctx.MultiUpdate(keyValues, gasInfo); err != nil {
 				abort(w, err)
 			}
 			return
