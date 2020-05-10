@@ -42,16 +42,16 @@ type KeyLease struct {
 }
 
 type GasInfo struct {
-	MaxGas   int
-	MaxFee   int
-	GasPrice int
+	MaxGas   int `json:"max_gas"`
+	MaxFee   int `json:"max_fee"`
+	GasPrice int `json:"gas_price"`
 }
 
 type LeaseInfo struct {
-	Days    int64
-	Hours   int64
-	Minutes int64
-	Seconds int64
+	Days    int64 `json:"days"`
+	Hours   int64 `json:"hours"`
+	Minutes int64 `json:"minutes"`
+	Seconds int64 `json:"seconds"`
 }
 
 func (lease *LeaseInfo) ToBlocks() int64 {
