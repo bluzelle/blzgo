@@ -26,6 +26,7 @@ type Client struct {
 	logger           *log.Entry
 	privateKey       *btcec.PrivateKey
 	broadcastRetries int
+	transactions     chan *Transaction
 }
 
 func (root *Client) UUID(uuid string) *Client {
@@ -64,6 +65,13 @@ func (ctx *Client) setAccount() error {
 	} else {
 		ctx.account = account
 		return nil
+	}
+}
+
+func (ctx *Client) processTransactions() {
+	for txn := range ctx.transactions {
+		// ctx.Infof("processing transaction(%+v)", txn)
+		ctx.ProcessTransaction(txn)
 	}
 }
 
@@ -106,6 +114,10 @@ func NewClient(options *Options) (*Client, error) {
 	if err := ctx.setAccount(); err != nil {
 		return nil, err
 	}
+
+	// Send transactions
+	ctx.transactions = make(chan *Transaction, 1) // serial
+	go ctx.processTransactions()
 
 	return ctx, nil
 }

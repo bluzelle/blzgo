@@ -102,6 +102,11 @@ type Transaction struct {
 	ApiRequestMethod   string
 	ApiRequestEndpoint string
 	GasInfo            *GasInfo
+
+	done             chan bool
+	result           []byte
+	err              error
+	broadcastRetries int
 }
 
 //
@@ -220,18 +225,31 @@ func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]
 }
 
 func (ctx *Client) SendTransaction(txn *Transaction) ([]byte, error) {
-	ctx.broadcastRetries = 0
+	txn.done = make(chan bool, 1)
+	ctx.transactions <- txn
+	done := <-txn.done
+	if !done {
+		ctx.Fatalf("txn did not complete") // todo: enqueue
+	}
+	if txn.err != nil {
+		ctx.Errorf("transaction err(%s)", txn.err)
+	}
+	return txn.result, txn.err
+}
+
+func (ctx *Client) ProcessTransaction(txn *Transaction) {
+	txn.broadcastRetries = 0
+
+	var result []byte
 	payload, err := ctx.ValidateTransaction(txn)
-	if err != nil {
-		// ctx.Errorf("txn err(%s)", err)
-		return nil, err
+	if err == nil {
+		result, err = ctx.BroadcastTransaction(payload, txn.GasInfo)
 	}
-	b, err := ctx.BroadcastTransaction(payload, txn.GasInfo)
-	if err != nil {
-		// ctx.Errorf("txn err(%s)", err)
-		return nil, err
-	}
-	return b, nil
+
+	txn.result = result
+	txn.err = err
+	txn.done <- true
+	close(txn.done)
 }
 
 // Get required min gas
