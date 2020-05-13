@@ -35,7 +35,7 @@ func main() {
 
 	log.Infof("creating key(%s), val(%s), lease(%ds)...", key, value, leaseInfo.ToBlocks())
 
-	if err := ctx.Create(key, value, leaseInfo, nil); err != nil {
+	if err := ctx.Create(key, value, bluzelle.TestGasInfo(), leaseInfo); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("created key")

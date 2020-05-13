@@ -16,7 +16,6 @@ type Options struct {
 	Endpoint string
 	UUID     string
 	ChainId  string
-	GasInfo  *GasInfo
 	Debug    bool
 }
 
@@ -36,14 +35,14 @@ func (root *Client) UUID(uuid string) *Client {
 		Endpoint: root.options.Endpoint,
 		UUID:     uuid,
 		ChainId:  root.options.ChainId,
-		GasInfo:  root.options.GasInfo,
 		Debug:    root.options.Debug,
 	}
 
 	ctx := &Client{
-		options:    options,
-		account:    root.account,
-		privateKey: root.privateKey,
+		options:      options,
+		account:      root.account,
+		privateKey:   root.privateKey,
+		transactions: root.transactions,
 	}
 
 	ctx.setupLogger()
@@ -86,12 +85,6 @@ func NewClient(options *Options) (*Client, error) {
 
 	if options.UUID == "" {
 		options.UUID = options.Address
-	}
-
-	if options.GasInfo == nil {
-		options.GasInfo = &GasInfo{ // todo
-			MaxFee: 4000001,
-		}
 	}
 
 	ctx := &Client{

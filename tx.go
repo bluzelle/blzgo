@@ -8,7 +8,7 @@ import (
 
 //
 
-func (ctx *Client) Create(key string, value string, leaseInfo *LeaseInfo, gasInfo *GasInfo) error {
+func (ctx *Client) Create(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	var lease int64
 	if leaseInfo != nil {
 		lease = leaseInfo.ToBlocks()
@@ -32,7 +32,7 @@ func (ctx *Client) Create(key string, value string, leaseInfo *LeaseInfo, gasInf
 
 //
 
-func (ctx *Client) Update(key string, value string, leaseInfo *LeaseInfo, gasInfo *GasInfo) error {
+func (ctx *Client) Update(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	var lease int64
 	if leaseInfo != nil {
 		lease = leaseInfo.ToBlocks()
@@ -124,7 +124,7 @@ func (ctx *Client) MultiUpdate(keyValues []*KeyValue, gasInfo *GasInfo) error {
 
 //
 
-func (ctx *Client) RenewLease(key string, leaseInfo *LeaseInfo, gasInfo *GasInfo) error {
+func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	if leaseInfo == nil {
 		return fmt.Errorf("lease is required")
 	}
@@ -146,7 +146,7 @@ func (ctx *Client) RenewLease(key string, leaseInfo *LeaseInfo, gasInfo *GasInfo
 
 //
 
-func (ctx *Client) RenewAllLeases(leaseInfo *LeaseInfo, gasInfo *GasInfo) error {
+func (ctx *Client) RenewAllLeases(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	if leaseInfo == nil {
 		return fmt.Errorf("lease is required")
 	}

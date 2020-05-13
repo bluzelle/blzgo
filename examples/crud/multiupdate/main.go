@@ -25,10 +25,10 @@ func main() {
 	key1 := strconv.FormatInt(100+time.Now().Unix(), 10)
 	key2 := strconv.FormatInt(200+time.Now().Unix(), 10)
 
-	if err := ctx.Create(key1, "value", nil, nil); err != nil {
+	if err := ctx.Create(key1, "value", bluzelle.TestGasInfo(), nil); err != nil {
 		log.Fatalf("%s", err)
 	}
-	if err := ctx.Create(key2, "value", nil, nil); err != nil {
+	if err := ctx.Create(key2, "value", bluzelle.TestGasInfo(), nil); err != nil {
 		log.Fatalf("%s", err)
 	}
 
@@ -38,7 +38,7 @@ func main() {
 
 	log.Infof("updating keys(%s)...", keyValues)
 
-	if err := ctx.MultiUpdate(keyValues, nil); err != nil {
+	if err := ctx.MultiUpdate(keyValues, bluzelle.TestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("done")

@@ -16,7 +16,7 @@ func main() {
 
 	log.Infof("getting keys...")
 
-	if v, err := ctx.TxKeys(nil); err != nil {
+	if v, err := ctx.TxKeys(bluzelle.TestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("keys(%+v)", v)

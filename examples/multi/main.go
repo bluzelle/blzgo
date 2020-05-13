@@ -25,7 +25,7 @@ func main() {
 		t := strconv.FormatInt(time.Now().Unix(), 10)
 		key := fmt.Sprintf("%s-%d", t, value)
 		log.Infof("creating key(%s), value(%d)", key, value)
-		if err := ctx.Create(key, fmt.Sprintf("%d", value), nil, nil); err != nil {
+		if err := ctx.Create(key, fmt.Sprintf("%d", value), bluzelle.TestGasInfo(), nil); err != nil {
 			log.Fatalf("%s", err)
 		} else {
 			log.Infof("created key")

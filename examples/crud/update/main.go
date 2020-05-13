@@ -35,7 +35,7 @@ func main() {
 
 	log.Infof("updating key(%s), val(%s), lease(%ds)...", key, value, leaseInfo.Seconds)
 
-	if err := ctx.Update(key, value, leaseInfo, nil); err != nil {
+	if err := ctx.Update(key, value, bluzelle.TestGasInfo(), leaseInfo); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("updated key")

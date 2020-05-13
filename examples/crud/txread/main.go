@@ -24,7 +24,7 @@ func main() {
 
 	log.Infof("getting val for key(%s)...", key)
 
-	if v, err := ctx.TxRead(key, nil); err != nil {
+	if v, err := ctx.TxRead(key, bluzelle.TestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("val(%s)", v)

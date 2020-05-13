@@ -290,33 +290,38 @@ func (ctx *Client) ValidateTransaction(txn *Transaction) (*TransactionBroadcastP
 	return res.Value, nil
 }
 
-func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, txGasInfo *GasInfo) ([]byte, error) {
+func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, gasInfo *GasInfo) ([]byte, error) {
 	// Set memo
 	txn.Memo = makeRandomString(32)
 
 	// Set fee
-	feeGas, err := strconv.Atoi(txn.Fee.Gas)
+	if gasInfo == nil {
+		return nil, fmt.Errorf("gas_info is required")
+	}
+	gas, err := strconv.Atoi(txn.Fee.Gas)
 	if err != nil {
 		ctx.Errorf("failed to pass gas to int(%s)", txn.Fee.Gas)
 	}
-
-	var gasInfo GasInfo
-	if txGasInfo == nil {
-		gasInfo = *ctx.options.GasInfo // clone
-	} else {
-		gasInfo = *txGasInfo
+	amount := 0
+	if len(txn.Fee.Amount) != 0 {
+		if a, err := strconv.Atoi(txn.Fee.Amount[0].Amount); err == nil {
+			amount = a
+		}
 	}
-	if gasInfo.MaxGas != 0 && feeGas > gasInfo.MaxGas {
-		txn.Fee.Gas = strconv.Itoa(gasInfo.MaxGas)
+	if gasInfo.MaxGas != 0 && gas > gasInfo.MaxGas {
+		gas = gasInfo.MaxGas
 	}
 	if gasInfo.MaxFee != 0 {
-		txn.Fee.Amount = []*TransactionFeeAmount{
-			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(gasInfo.MaxFee)},
-		}
+		amount = gasInfo.MaxFee
 	} else if gasInfo.GasPrice != 0 {
-		txn.Fee.Amount = []*TransactionFeeAmount{
-			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(feeGas * gasInfo.GasPrice)},
-		}
+		amount = gas * gasInfo.GasPrice
+	}
+
+	txn.Fee = &TransactionFee{
+		Gas: strconv.Itoa(gas),
+		Amount: []*TransactionFeeAmount{
+			&TransactionFeeAmount{Denom: TOKEN_NAME, Amount: strconv.Itoa(amount)},
+		},
 	}
 
 	// Set signatures
@@ -386,7 +391,7 @@ func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, txGasI
 		if err := ctx.setAccount(); err != nil {
 			return nil, err
 		}
-		b, err := ctx.BroadcastTransaction(txn, &gasInfo)
+		b, err := ctx.BroadcastTransaction(txn, gasInfo)
 		return b, err
 	}
 

@@ -24,9 +24,6 @@ func main() {
     Address:  "...",
     Mnemonic: "...",
     Endpoint: "http://testnet.public.bluzelle.com:1317",
-    GasInfo: &bluzelle.GasInfo{
-      MaxFee: 4000001,
-    },
   }
   client, err := bluzelle.NewClient(options)
   if err != nil {

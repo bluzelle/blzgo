@@ -24,7 +24,7 @@ func main() {
 
 	log.Infof("getting lease for key(%s)...", key)
 
-	if v, err := ctx.TxGetLease(key, nil); err != nil {
+	if v, err := ctx.TxGetLease(key, bluzelle.TestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("lease(%ds)", v)

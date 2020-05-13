@@ -13,7 +13,7 @@ func TestCreate(t *testing.T) {
 	defer ctx.TestTearDown()
 
 	// create key
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, nil, nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 }
@@ -28,12 +28,12 @@ func TestUpdate(t *testing.T) {
 	assert := assert.New(t)
 
 	// create key
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, nil, nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
 	// update key
-	if err := ctx.Client.Update(ctx.Key1, ctx.Value2, nil, nil); err != nil {
+	if err := ctx.Client.Update(ctx.Key1, ctx.Value2, TestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -54,7 +54,7 @@ func TestDelete(t *testing.T) {
 
 	assert := assert.New(t)
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, nil, nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -64,7 +64,7 @@ func TestDelete(t *testing.T) {
 		assert.Equal(b, true)
 	}
 
-	if err := ctx.Client.Delete(ctx.Key1, nil); err != nil {
+	if err := ctx.Client.Delete(ctx.Key1, TestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	}
 

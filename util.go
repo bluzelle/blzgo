@@ -58,10 +58,7 @@ func NewTestClient() (*Client, error) {
 		UUID:     os.Getenv("UUID"),
 		Endpoint: os.Getenv("ENDPOINT"),
 		ChainId:  os.Getenv("CHAIN_ID"),
-		GasInfo: &GasInfo{
-			MaxFee: 4000001,
-		},
-		Debug: debug,
+		Debug:    debug,
 	}
 	ctx, err := NewClient(options)
 	if err != nil {
@@ -82,5 +79,11 @@ func LoadEnv() {
 		if err := godotenv.Load("../.env"); err != nil { // when running tests
 			// log.Errorf("%s", err)
 		}
+	}
+}
+
+func TestGasInfo() *GasInfo {
+	return &GasInfo{
+		MaxFee: 4000001,
 	}
 }

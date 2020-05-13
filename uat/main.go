@@ -11,6 +11,18 @@ import (
 
 var ctx *bluzelle.Client
 
+const KEY_MUST_BE_A_STRING = "Key must be a string"
+const NEW_KEY_MUST_BE_A_STRING = "New key must be a string"
+const VALUE_MUST_BE_A_STRING = "Value must be a string"
+const ALL_KEYS_MUST_BE_STRINGS = "All keys must be strings"
+const ALL_VALUES_MUST_BE_STRINGS = "All values must be strings"
+const INVALID_LEASE_TIME = "Invalid lease time"
+const INVALID_VALUE_SPECIFIED = "Invalid value specified"
+const ADDRESS_MUST_BE_A_STRING = "address must be a string"
+const MNEMONIC_MUST_BE_A_STRING = "mnemonic must be a string"
+const UUID_MUST_BE_A_STRING = "uuid must be a string"
+const INVALID_TRANSACTION = "Invalid transaction."
+
 type Request struct {
 	Method string        `json:"method"`
 	Args   []interface{} `json:"args"`
@@ -55,71 +67,114 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("both key and value are required"))
 			return
 		}
-		if leaseInfo, gasInfo, err := parseLeaseAndGasInfo(request, 2, 3); err != nil {
-			abort(w, err)
-			return
-		} else {
-			if err := ctx.Create(request.Args[0].(string), request.Args[1].(string), leaseInfo, gasInfo); err != nil {
-				abort(w, err)
-			}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
 			return
 		}
+		value, ok := request.Args[1].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, leaseInfo, err := parseGasAndLeaseInfos(request, 2, 3)
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		if leaseInfo != nil && leaseInfo.ToBlocks() < 0 {
+			abort(w, fmt.Errorf(INVALID_LEASE_TIME))
+			return
+		}
+		if err := ctx.Create(key, value, gasInfo, leaseInfo); err != nil {
+			abort(w, err)
+		}
+		return
 
 	case "update":
 		if len(request.Args) < 2 {
 			abort(w, fmt.Errorf("both key and value are required"))
 			return
 		}
-		if leaseInfo, gasInfo, err := parseLeaseAndGasInfo(request, 2, 3); err != nil {
-			abort(w, err)
-			return
-		} else {
-			if err := ctx.Update(request.Args[0].(string), request.Args[1].(string), leaseInfo, gasInfo); err != nil {
-				abort(w, err)
-			}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
 			return
 		}
+		value, ok := request.Args[1].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, leaseInfo, err := parseGasAndLeaseInfos(request, 2, 3)
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		if leaseInfo != nil && leaseInfo.ToBlocks() < 0 {
+			abort(w, fmt.Errorf(INVALID_LEASE_TIME))
+			return
+		}
+		if err := ctx.Update(key, value, gasInfo, leaseInfo); err != nil {
+			abort(w, err)
+		}
+		return
 
 	case "delete":
 		if len(request.Args) < 2 {
 			abort(w, fmt.Errorf("key is required"))
 			return
 		}
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 1); err != nil {
-			abort(w, err)
-			return
-		} else {
-			if err := ctx.Delete(request.Args[0].(string), gasInfo); err != nil {
-				abort(w, err)
-			}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
 			return
 		}
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 1)
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		if err := ctx.Delete(key, gasInfo); err != nil {
+			abort(w, err)
+		}
+		return
 
 	case "rename":
 		if len(request.Args) < 2 {
 			abort(w, fmt.Errorf("both key and newkey are required"))
 			return
 		}
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, 2, 3); err != nil {
-			abort(w, err)
-			return
-		} else {
-			if err := ctx.Rename(request.Args[0].(string), request.Args[1].(string), gasInfo); err != nil {
-				abort(w, err)
-			}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
 			return
 		}
+		newKey, ok := request.Args[1].(string)
+		if !ok {
+			abort(w, fmt.Errorf(NEW_KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, _, err := parseGasAndLeaseInfos(request, 2, 3)
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		if err := ctx.Rename(key, newKey, gasInfo); err != nil {
+			abort(w, err)
+		}
+		return
 
 	case "delete_all":
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 0); err != nil {
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 0)
+		if err != nil {
 			abort(w, err)
 			return
-		} else {
-			if err := ctx.DeleteAll(gasInfo); err != nil {
-				abort(w, err)
-			}
-			return
 		}
+		if err := ctx.DeleteAll(gasInfo); err != nil {
+			abort(w, err)
+		}
+		return
 
 	case "multi_update":
 		keyValues := []*bluzelle.KeyValue{}
@@ -135,7 +190,7 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			gasInfoIndex = -1
 		}
 
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, gasInfoIndex); err != nil {
+		if gasInfo, _, err := parseGasAndLeaseInfos(request, -1, gasInfoIndex); err != nil {
 			abort(w, err)
 			return
 		} else {
@@ -150,30 +205,43 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("both key and lease_info are required"))
 			return
 		}
-		if leaseInfo, gasInfo, err := parseLeaseAndGasInfo(request, 1, 2); err != nil {
-			abort(w, err)
-			return
-		} else {
-			if err := ctx.RenewLease(request.Args[0].(string), leaseInfo, gasInfo); err != nil {
-				abort(w, err)
-			}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
 			return
 		}
+		gasInfo, leaseInfo, err := parseGasAndLeaseInfos(request, 1, 2)
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		if leaseInfo != nil && leaseInfo.ToBlocks() < 0 {
+			abort(w, fmt.Errorf(INVALID_LEASE_TIME))
+			return
+		}
+		if err := ctx.RenewLease(key, gasInfo, leaseInfo); err != nil {
+			abort(w, err)
+		}
+		return
 
 	case "renew_all_leases":
 		if len(request.Args) < 2 {
 			abort(w, fmt.Errorf("both key and newkey are required"))
 			return
 		}
-		if leaseInfo, gasInfo, err := parseLeaseAndGasInfo(request, 0, 1); err != nil {
+		gasInfo, leaseInfo, err := parseGasAndLeaseInfos(request, 0, 1)
+		if err != nil {
 			abort(w, err)
 			return
-		} else {
-			if err := ctx.RenewAllLeases(leaseInfo, gasInfo); err != nil {
-				abort(w, err)
-			}
+		}
+		if leaseInfo != nil && leaseInfo.ToBlocks() < 0 {
+			abort(w, fmt.Errorf(INVALID_LEASE_TIME))
 			return
 		}
+		if err := ctx.RenewAllLeases(gasInfo, leaseInfo); err != nil {
+			abort(w, err)
+		}
+		return
 
 	//
 
@@ -182,18 +250,30 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("key is required"))
 			return
 		}
-		key := request.Args[0].(string)
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
 		if len(request.Args) == 1 {
 			if v, err := ctx.Read(key); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				if response, err := json.Marshal(v); err != nil {
+					abort(w, fmt.Errorf("%s", err))
+				} else {
+					fmt.Fprintf(w, fmt.Sprintf("%s", response))
+				}
 			}
 		} else {
 			if v, err := ctx.ProvenRead(key); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				if response, err := json.Marshal(v); err != nil {
+					abort(w, fmt.Errorf("%s", err))
+				} else {
+					fmt.Fprintf(w, fmt.Sprintf("%s", response))
+				}
 			}
 		}
 		return
@@ -203,10 +283,19 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("key is required"))
 			return
 		}
-		if v, err := ctx.Has(request.Args[0].(string)); err != nil {
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		if v, err := ctx.Has(key); err != nil {
 			abort(w, fmt.Errorf("%s", err))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+			if response, err := json.Marshal(v); err != nil {
+				abort(w, fmt.Errorf("%s", err))
+			} else {
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
+			}
 		}
 		return
 
@@ -214,7 +303,11 @@ func uat(w http.ResponseWriter, r *http.Request) {
 		if v, err := ctx.Count(); err != nil {
 			abort(w, fmt.Errorf("%s", err))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+			if response, err := json.Marshal(v); err != nil {
+				abort(w, fmt.Errorf("%s", err))
+			} else {
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
+			}
 		}
 		return
 
@@ -222,7 +315,11 @@ func uat(w http.ResponseWriter, r *http.Request) {
 		if v, err := ctx.Keys(); err != nil {
 			abort(w, fmt.Errorf("%s", err))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+			if response, err := json.Marshal(v); err != nil {
+				abort(w, fmt.Errorf("%s", err))
+			} else {
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
+			}
 		}
 		return
 
@@ -230,7 +327,11 @@ func uat(w http.ResponseWriter, r *http.Request) {
 		if v, err := ctx.KeyValues(); err != nil {
 			abort(w, fmt.Errorf("%s", err))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+			if response, err := json.Marshal(v); err != nil {
+				abort(w, fmt.Errorf("%s", err))
+			} else {
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
+			}
 		}
 		return
 
@@ -239,10 +340,19 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("key is required"))
 			return
 		}
-		if v, err := ctx.GetLease(request.Args[0].(string)); err != nil {
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		if v, err := ctx.GetLease(key); err != nil {
 			abort(w, fmt.Errorf("%s", err))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+			if response, err := json.Marshal(v); err != nil {
+				abort(w, fmt.Errorf("%s", err))
+			} else {
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
+			}
 		}
 		return
 
@@ -251,10 +361,19 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("n is required"))
 			return
 		}
-		if v, err := ctx.GetNShortestLeases(request.Args[0].(uint64)); err != nil {
+		n, ok := request.Args[0].(uint64)
+		if !ok {
+			abort(w, fmt.Errorf(INVALID_VALUE_SPECIFIED))
+			return
+		}
+		if v, err := ctx.GetNShortestLeases(n); err != nil {
 			abort(w, fmt.Errorf("%s", err))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+			if response, err := json.Marshal(v); err != nil {
+				abort(w, fmt.Errorf("%s", err))
+			} else {
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
+			}
 		}
 		return
 
@@ -265,15 +384,23 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("key is required"))
 			return
 		}
-
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 1); err != nil {
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 1)
+		if err != nil {
 			abort(w, err)
 			return
+		}
+		if v, err := ctx.TxRead(key, gasInfo); err != nil {
+			abort(w, fmt.Errorf("%s", err))
 		} else {
-			if v, err := ctx.TxRead(request.Args[0].(string), gasInfo); err != nil {
+			if response, err := json.Marshal(v); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
 			}
 		}
 		return
@@ -283,54 +410,74 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("key is required"))
 			return
 		}
-
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 1); err != nil {
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 1)
+		if err != nil {
 			abort(w, err)
 			return
+		}
+		if v, err := ctx.TxHas(key, gasInfo); err != nil {
+			abort(w, fmt.Errorf("%s", err))
 		} else {
-			if v, err := ctx.TxHas(request.Args[0].(string), gasInfo); err != nil {
+			if response, err := json.Marshal(v); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
 			}
 		}
 		return
 
 	case "tx_count":
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 0); err != nil {
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 0)
+		if err != nil {
 			abort(w, err)
 			return
+		}
+		if v, err := ctx.TxCount(gasInfo); err != nil {
+			abort(w, fmt.Errorf("%s", err))
 		} else {
-			if v, err := ctx.TxCount(gasInfo); err != nil {
+			if response, err := json.Marshal(v); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
 			}
 		}
 		return
 
 	case "tx_keys":
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 0); err != nil {
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 0)
+		if err != nil {
 			abort(w, err)
 			return
+		}
+		if v, err := ctx.TxKeys(gasInfo); err != nil {
+			abort(w, fmt.Errorf("%s", err))
 		} else {
-			if v, err := ctx.TxKeys(gasInfo); err != nil {
+			if response, err := json.Marshal(v); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
 			}
 		}
 		return
 
 	case "tx_key_values":
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 0); err != nil {
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 0)
+		if err != nil {
 			abort(w, err)
 			return
+		}
+		if v, err := ctx.TxKeyValues(gasInfo); err != nil {
+			abort(w, fmt.Errorf("%s", err))
 		} else {
-			if v, err := ctx.TxKeyValues(gasInfo); err != nil {
+			if response, err := json.Marshal(v); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
 			}
 		}
 		return
@@ -340,14 +487,23 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("key is required"))
 			return
 		}
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 1); err != nil {
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 1)
+		if err != nil {
 			abort(w, err)
 			return
+		}
+		if v, err := ctx.TxGetLease(key, gasInfo); err != nil {
+			abort(w, fmt.Errorf("%s", err))
 		} else {
-			if v, err := ctx.TxGetLease(request.Args[0].(string), gasInfo); err != nil {
+			if response, err := json.Marshal(v); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
 			}
 		}
 		return
@@ -357,14 +513,23 @@ func uat(w http.ResponseWriter, r *http.Request) {
 			abort(w, fmt.Errorf("n is required"))
 			return
 		}
-		if _, gasInfo, err := parseLeaseAndGasInfo(request, -1, 1); err != nil {
+		n, ok := request.Args[0].(uint64)
+		if !ok {
+			abort(w, fmt.Errorf(INVALID_VALUE_SPECIFIED))
+			return
+		}
+		gasInfo, _, err := parseGasAndLeaseInfos(request, -1, 1)
+		if err != nil {
 			abort(w, err)
 			return
+		}
+		if v, err := ctx.TxGetNShortestLeases(n, gasInfo); err != nil {
+			abort(w, fmt.Errorf("%s", err))
 		} else {
-			if v, err := ctx.TxGetNShortestLeases(request.Args[0].(uint64), gasInfo); err != nil {
+			if response, err := json.Marshal(v); err != nil {
 				abort(w, fmt.Errorf("%s", err))
 			} else {
-				fmt.Fprintf(w, fmt.Sprintf("%v\n", v))
+				fmt.Fprintf(w, fmt.Sprintf("%s", response))
 			}
 		}
 		return
@@ -381,20 +546,50 @@ func abort(w http.ResponseWriter, err error) {
 	http.Error(w, fmt.Sprintf("%s", err), http.StatusBadRequest)
 }
 
-func parseLeaseAndGasInfo(
+func parseGasAndLeaseInfos(
 	request *Request,
 	gasInfoIndex int,
 	leaseInfoIndex int,
 ) (
-	*bluzelle.LeaseInfo,
 	*bluzelle.GasInfo,
+	*bluzelle.LeaseInfo,
 	error,
 ) {
-	var leaseInfo *bluzelle.LeaseInfo
 	var gasInfo *bluzelle.GasInfo
+	var leaseInfo *bluzelle.LeaseInfo
+
+	if gasInfoIndex != -1 && len(request.Args) > gasInfoIndex {
+		gasInfo = &bluzelle.GasInfo{}
+		gasInfoArg := request.Args[gasInfoIndex]
+		if gasInfoMap, ok := gasInfoArg.(map[string]interface{}); !ok {
+			return nil, nil, fmt.Errorf("could not parse gasInfo: %v", gasInfoArg)
+		} else {
+			if gasInfoMap["max_gas"] != nil {
+				if maxGas, ok := gasInfoMap["max_gas"].(float64); !ok {
+					return nil, nil, fmt.Errorf("could not parse gasInfo[maxGas]: %v", gasInfoMap["max_gas"])
+				} else {
+					gasInfo.MaxGas = int(maxGas)
+				}
+			}
+			if gasInfoMap["max_fee"] != nil {
+				if maxFee, ok := gasInfoMap["max_fee"].(float64); !ok {
+					return nil, nil, fmt.Errorf("could not parse gasInfo[maxFee]: %v", gasInfoMap["max_fee"])
+				} else {
+					gasInfo.MaxFee = int(maxFee)
+				}
+			}
+			if gasInfoMap["gas_price"] != nil {
+				if gasPrice, ok := gasInfoMap["gas_price"].(float64); !ok {
+					return nil, nil, fmt.Errorf("could not parse gasInfo[gasPrice]: %v", gasInfoMap["gas_price"])
+				} else {
+					gasInfo.GasPrice = int(gasPrice)
+				}
+			}
+		}
+	}
 
 	if leaseInfoIndex != -1 && len(request.Args) > leaseInfoIndex {
-		leaseInfo := &bluzelle.LeaseInfo{}
+		leaseInfo = &bluzelle.LeaseInfo{}
 		leaseInfoArg := request.Args[leaseInfoIndex]
 		if leaseInfoMap, ok := leaseInfoArg.(map[string]interface{}); !ok {
 			return nil, nil, fmt.Errorf("could not parse leaseInfo: %v", leaseInfoArg)
@@ -428,37 +623,7 @@ func parseLeaseAndGasInfo(
 				}
 			}
 		}
-
-		if gasInfoIndex != -1 && len(request.Args) > gasInfoIndex {
-			gasInfo := &bluzelle.GasInfo{}
-			gasInfoArg := request.Args[gasInfoIndex]
-			if gasInfoMap, ok := gasInfoArg.(map[string]interface{}); !ok {
-				return nil, nil, fmt.Errorf("could not parse gasInfo: %v", gasInfoArg)
-			} else {
-				if gasInfoMap["max_gas"] != nil {
-					if maxGas, ok := gasInfoMap["max_gas"].(float64); !ok {
-						return nil, nil, fmt.Errorf("could not parse gasInfo[maxGas]: %v", gasInfoMap["max_gas"])
-					} else {
-						gasInfo.MaxGas = int(maxGas)
-					}
-				}
-				if gasInfoMap["max_fee"] != nil {
-					if maxFee, ok := gasInfoMap["max_fee"].(float64); !ok {
-						return nil, nil, fmt.Errorf("could not parse gasInfo[maxFee]: %v", gasInfoMap["max_fee"])
-					} else {
-						gasInfo.MaxFee = int(maxFee)
-					}
-				}
-				if gasInfoMap["gas_price"] != nil {
-					if gasPrice, ok := gasInfoMap["gas_price"].(float64); !ok {
-						return nil, nil, fmt.Errorf("could not parse gasInfo[gasPrice]: %v", gasInfoMap["gas_price"])
-					} else {
-						gasInfo.GasPrice = int(gasPrice)
-					}
-				}
-			}
-		}
 	}
 
-	return leaseInfo, gasInfo, nil
+	return gasInfo, leaseInfo, nil
 }
