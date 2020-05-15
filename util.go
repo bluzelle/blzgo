@@ -87,3 +87,24 @@ func TestGasInfo() *GasInfo {
 		MaxFee: 4000001,
 	}
 }
+
+func sanitizeString(s string) string {
+	return s
+	// return re.ReplaceAllStringFunc(s, sanitizeStringToken)
+	// s.gsub(/([&<>])/) { |token|
+	// 	"\\u00#{token[0].ord.to_s(16)}"
+	// }
+}
+
+// func sanitizeStringToken(token string) {
+// 	return "\\u00#{token[0].ord.to_s(16)}"
+// }
+
+func encodeSafe(s string) string {
+	return s
+	// return re.ReplaceAllStringFunc(s, sanitizeStringToken)
+}
+
+// func encodeSafeToken(token string) {
+// 	return "%#{token[0].ord.to_s(16)}"
+// }

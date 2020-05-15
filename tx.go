@@ -146,7 +146,7 @@ func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo
 
 //
 
-func (ctx *Client) RenewAllLeases(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
+func (ctx *Client) RenewLeaseAll(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	if leaseInfo == nil {
 		return fmt.Errorf("lease is required")
 	}
@@ -163,6 +163,10 @@ func (ctx *Client) RenewAllLeases(gasInfo *GasInfo, leaseInfo *LeaseInfo) error 
 		return err
 	}
 	return nil
+}
+
+func (ctx *Client) RenewAllLeases(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
+	return ctx.RenewLeaseAll(gasInfo, leaseInfo)
 }
 
 //
