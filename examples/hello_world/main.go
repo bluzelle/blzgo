@@ -17,7 +17,7 @@ func main() {
 	}
 
 	// read account
-	if account, err := ctx.ReadAccount(); err != nil {
+	if account, err := ctx.Account(); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("account info: %+v", account)

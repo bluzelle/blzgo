@@ -459,6 +459,18 @@ func uat(w http.ResponseWriter, r *http.Request) {
 
 	//
 
+	case "account":
+		v, err := ctx.Account()
+		respond(&w, v, err)
+		return
+
+	case "version":
+		v, err := ctx.Version()
+		respond(&w, v, err)
+		return
+
+	//
+
 	default:
 		abort(w, fmt.Errorf("unsupported method: %s", request.Method))
 		return

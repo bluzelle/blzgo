@@ -59,7 +59,7 @@ func (ctx *Client) setupLogger() {
 
 // Fetch the address account info (`number` and `sequence` to be used later)
 func (ctx *Client) setAccount() error {
-	if account, err := ctx.ReadAccount(); err != nil {
+	if account, err := ctx.Account(); err != nil {
 		return err
 	} else {
 		ctx.account = account

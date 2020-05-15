@@ -232,7 +232,7 @@ type AccountResponse struct {
 	Result *AccountResponseResult `json:"result"`
 }
 
-func (ctx *Client) ReadAccount() (*Account, error) {
+func (ctx *Client) Account() (*Account, error) {
 	res := &AccountResponse{}
 
 	body, err := ctx.APIQuery("/auth/accounts/" + ctx.options.Address)
