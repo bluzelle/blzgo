@@ -63,12 +63,6 @@ func uat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	types := []interface{}{
-		string,
-		string,
-	}
-	fmt.Printf("%+v", types)
-
 	inputs := make([]reflect.Value, len(request.Args))
 	for i, _ := range request.Args {
 		inputs[i] = reflect.ValueOf(request.Args[i])

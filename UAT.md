@@ -5,7 +5,28 @@ The following guide describe setting up the project and running an example code 
 1. Ensure latest go version is installed:
 
 ```
-sudo apt install -y golang
+cd /tmp
+wget https://dl.google.com/go/go1.14.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.14.linux-amd64.tar.gz
+
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+```
+
+2. Clone the project:
+
+```
+mkdir -p ~/go/src/github.com/vbstreetz
+cd  ~/go/src/github.com/vbstreetz
+git clone https://github.com/vbstreetz/blzgo.git
+cd blzgo
+```
+
+3. Install the dependencies listed in `go.mo`:
+
+```
+go get ./...
 ```
 
 2. Setup the sample environment variables:
