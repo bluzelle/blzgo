@@ -2,7 +2,13 @@
 
 The following guide describe setting up the project and running an example code and tests in an Ubuntu 18.04 machine. Once ssh'd into the machine:
 
-1. Ensure latest go version is installed:
+1. Install required system tools
+
+```
+sudo apt install -y build-essential make
+```
+
+2. Ensure latest golang version is installed:
 
 ```
 cd /tmp
@@ -14,19 +20,13 @@ export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ```
 
-2. Clone the project:
+3. Clone the project:
 
 ```
 mkdir -p ~/go/src/github.com/vbstreetz
 cd  ~/go/src/github.com/vbstreetz
 git clone https://github.com/vbstreetz/blzgo.git
 cd blzgo
-```
-
-3. Install the dependencies listed in `go.mo`:
-
-```
-go get ./...
 ```
 
 2. Setup the sample environment variables:
