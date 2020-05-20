@@ -6,12 +6,17 @@ import (
 	"strconv"
 )
 
+const INVALID_LEASE_TIME = "Invalid lease time"
+
 //
 
 func (ctx *Client) Create(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	var lease int64
 	if leaseInfo != nil {
 		lease = leaseInfo.ToBlocks()
+	}
+	if lease < 0 {
+		return fmt.Errorf("%s", INVALID_LEASE_TIME)
 	}
 
 	transaction := &Transaction{
@@ -36,6 +41,9 @@ func (ctx *Client) Update(key string, value string, gasInfo *GasInfo, leaseInfo 
 	var lease int64
 	if leaseInfo != nil {
 		lease = leaseInfo.ToBlocks()
+	}
+	if lease < 0 {
+		return fmt.Errorf("%s", INVALID_LEASE_TIME)
 	}
 
 	transaction := &Transaction{
@@ -128,6 +136,9 @@ func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo
 	if leaseInfo == nil {
 		return fmt.Errorf("lease is required")
 	}
+	if lease < 0 {
+		return fmt.Errorf("%s", INVALID_LEASE_TIME)
+	}
 
 	transaction := &Transaction{
 		Key:                key,
@@ -149,6 +160,9 @@ func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo
 func (ctx *Client) RenewLeaseAll(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	if leaseInfo == nil {
 		return fmt.Errorf("lease is required")
+	}
+	if lease < 0 {
+		return fmt.Errorf("%s", INVALID_LEASE_TIME)
 	}
 
 	transaction := &Transaction{
