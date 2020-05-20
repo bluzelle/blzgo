@@ -202,7 +202,7 @@ type GetNShortestLeasesResponse struct {
 }
 
 func (ctx *Client) GetNShortestLeases(n uint64) ([]*GetNShortestLeasesResponseResultKeyLease, error) {
-	body, err := ctx.APIQuery(fmt.Sprintf("/crud/getnshortestlease/%s/%d", ctx.options.UUID, n))
+	body, err := ctx.APIQuery(fmt.Sprintf("/crud/getnshortestleases/%s/%d", ctx.options.UUID, n))
 	if err != nil {
 		return nil, err
 	}

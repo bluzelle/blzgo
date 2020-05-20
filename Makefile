@@ -135,12 +135,12 @@ uuid:
 pkgs:
 	@dep ensure
 
-test:
-	@go test . -test.v
+test: fmt
+	@go test . -failfast -test.v
 #	@./test.sh
 
-test-spec:
-	@go test . -test.v -run 'Test$(o)'
+test-spec: fmt
+	@go test . -failfast -test.v -run 'Test$(o)'
 
 fmt:
 	@gofmt -w *.go

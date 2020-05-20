@@ -329,7 +329,7 @@ func (ctx *Client) TxGetNShortestLeases(n uint64, gasInfo *GasInfo) ([]*GetNShor
 	transaction := &Transaction{
 		N:                  n,
 		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/getnshortestlease",
+		ApiRequestEndpoint: "/crud/getnshortestleases",
 		GasInfo:            gasInfo,
 	}
 
