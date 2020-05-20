@@ -256,7 +256,7 @@ func (ctx *Client) ProcessTransaction(txn *Transaction) {
 func (ctx *Client) ValidateTransaction(txn *Transaction) (*TransactionBroadcastPayload, error) {
 	req := &TransactionValidateRequest{
 		BaseReq: &TransactionValidateRequestBaseReq{
-			From:    ctx.options.Address,
+			From:    ctx.Address,
 			ChainId: ctx.options.ChainId,
 		},
 		UUID:      ctx.options.UUID,
@@ -265,7 +265,7 @@ func (ctx *Client) ValidateTransaction(txn *Transaction) (*TransactionBroadcastP
 		Lease:     strconv.FormatInt(txn.Lease, 10),
 		N:         strconv.FormatUint(txn.N, 10),
 		NewKey:    txn.NewKey,
-		Owner:     ctx.options.Address,
+		Owner:     ctx.Address,
 		Value:     txn.Value,
 	}
 

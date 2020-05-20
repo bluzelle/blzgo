@@ -219,9 +219,15 @@ func (ctx *Client) GetNShortestLeases(n uint64) ([]*GetNShortestLeasesResponseRe
 //
 
 type Account struct {
-	PublicKey     string `json:"public_key"`
-	AccountNumber int    `json:"account_number"`
-	Sequence      int    `json:"sequence"`
+	AccountNumber int     `json:"account_number"`
+	Coins         []*Coin `json:"coins"`
+	PublicKey     string  `json:"public_key"`
+	Sequence      int     `json:"sequence"`
+}
+
+type Coin struct {
+	Denom  string `json:"denom"`
+	Amount string `json:"amount"`
 }
 
 type AccountResponseResult struct {
@@ -235,7 +241,7 @@ type AccountResponse struct {
 func (ctx *Client) Account() (*Account, error) {
 	res := &AccountResponse{}
 
-	body, err := ctx.APIQuery("/auth/accounts/" + ctx.options.Address)
+	body, err := ctx.APIQuery("/auth/accounts/" + ctx.Address)
 	if err != nil {
 		return nil, err
 	}

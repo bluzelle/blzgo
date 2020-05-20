@@ -136,7 +136,7 @@ func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo
 	if leaseInfo == nil {
 		return fmt.Errorf("lease is required")
 	}
-	if lease < 0 {
+	if leaseInfo.ToBlocks() < 0 {
 		return fmt.Errorf("%s", INVALID_LEASE_TIME)
 	}
 
@@ -161,7 +161,7 @@ func (ctx *Client) RenewLeaseAll(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	if leaseInfo == nil {
 		return fmt.Errorf("lease is required")
 	}
-	if lease < 0 {
+	if leaseInfo.ToBlocks() < 0 {
 		return fmt.Errorf("%s", INVALID_LEASE_TIME)
 	}
 

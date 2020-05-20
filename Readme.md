@@ -21,9 +21,9 @@ import (
 func main() {
   // create client
   options := &bluzelle.Options{
-    Address:  "...",
     Mnemonic: "...",
     Endpoint: "http://testnet.public.bluzelle.com:1317",
+    UUID: "...",
   }
   client, err := bluzelle.NewClient(options)
   if err != nil {
@@ -72,9 +72,13 @@ func main() {
 
 ### Examples
 
-You can test out the `examples/` included by:
+You can test out the `examples/` included by following these steps:
 
-1. Coping `.env.sample` file to `.env` to configure the environment and then updating the resulting file, `.env`, accordingly. You can also use this test [file](https://gist.github.com/vbstreetz/f05a982530311d155836e27d41c1f73a)
+1. Copy `.env.sample` to `.env` and configure if needed.
+
+```
+cp .env.sample .env
+```
 
 2. Install dependencies:
 
@@ -88,11 +92,17 @@ You can test out the `examples/` included by:
     $ make read key=foo
 ```
 
+This will run the `examples/crud/read.go`.
+
 ### Integration Tests
 
 ```
     $ make test
 ```
+
+### User Acceptance Testing
+
+Please checkout the [UAT.md](https://github.com/vbstreetz/blzgo/blob/master/Readme.md) document for more details.
 
 ### Licence
 

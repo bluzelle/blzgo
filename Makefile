@@ -139,7 +139,7 @@ test:
 	@go test . -test.v
 #	@./test.sh
 
-test-method:
+test-spec:
 	@go test . -test.v -run 'Test$(o)'
 
 fmt:
@@ -147,7 +147,7 @@ fmt:
 	@gofmt -w examples/**
 	@gofmt -w uat/**
 
-uat:
+uat: fmt
 	@go run uat/*.go
 
 .PHONY: help \
@@ -180,5 +180,6 @@ uat:
 	uuid \
 	pkgs \
 	test \
+	test-spec \
 	fmt \
 	uat

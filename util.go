@@ -53,7 +53,6 @@ func NewTestClient() (*Client, error) {
 
 	// create client
 	options := &Options{
-		Address:  os.Getenv("ADDRESS"),
 		Mnemonic: os.Getenv("MNEMONIC"),
 		UUID:     os.Getenv("UUID"),
 		Endpoint: os.Getenv("ENDPOINT"),
@@ -86,6 +85,10 @@ func TestGasInfo() *GasInfo {
 	return &GasInfo{
 		MaxFee: 4000001,
 	}
+}
+
+func TestAddress() string {
+	return os.Getenv("ADDRESS")
 }
 
 func sanitizeString(s string) string {

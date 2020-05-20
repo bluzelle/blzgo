@@ -1,6 +1,7 @@
 package bluzelle
 
 import (
+	"fmt"
 	"github.com/apex/log"
 	"github.com/btcsuite/btcd/btcec"
 )
@@ -11,7 +12,6 @@ const HD_PATH string = "m/44'/118'/0'/0/0"
 const ADDRESS_PREFIX string = "bluzelle"
 
 type Options struct {
-	Address  string
 	Mnemonic string
 	Endpoint string
 	UUID     string
@@ -20,6 +20,7 @@ type Options struct {
 }
 
 type Client struct {
+	Address          string
 	options          *Options
 	account          *Account
 	logger           *log.Entry
@@ -30,8 +31,6 @@ type Client struct {
 
 func (root *Client) UUID(uuid string) *Client {
 	options := &Options{
-		Address: root.options.Address,
-		// Mnemonic: root.options.Mnemonic,
 		Endpoint: root.options.Endpoint,
 		UUID:     uuid,
 		ChainId:  root.options.ChainId,
@@ -52,8 +51,7 @@ func (root *Client) UUID(uuid string) *Client {
 
 func (ctx *Client) setupLogger() {
 	ctx.logger = log.WithFields(log.Fields{
-		"uuid":    ctx.options.UUID,
-		"address": ctx.options.Address,
+		"uuid": ctx.options.UUID,
 	})
 }
 
@@ -75,16 +73,17 @@ func (ctx *Client) processTransactions() {
 }
 
 func NewClient(options *Options) (*Client, error) {
+	if options.Mnemonic == "" {
+		return nil, fmt.Errorf("mnemonic is required")
+	}
+	if options.UUID == "" {
+		return nil, fmt.Errorf("uuid is required")
+	}
 	if options.Endpoint == "" {
 		options.Endpoint = DEFAULT_ENDPOINT
 	}
-
 	if options.ChainId == "" {
 		options.ChainId = DEFAULT_CHAIN_ID
-	}
-
-	if options.UUID == "" {
-		options.UUID = options.Address
 	}
 
 	ctx := &Client{
@@ -98,8 +97,8 @@ func NewClient(options *Options) (*Client, error) {
 		return nil, err
 	}
 
-	// Validate the address against mnemonic
-	if err := ctx.verifyAddress(); err != nil {
+	// Derive address from the mnemonic
+	if err := ctx.setAddress(); err != nil {
 		return nil, err
 	}
 

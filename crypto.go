@@ -1,7 +1,6 @@
 package bluzelle
 
 import (
-	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/btcsuite/btcutil/hdkeychain"
@@ -41,8 +40,8 @@ func (ctx *Client) setPrivateKey() error {
 	return nil
 }
 
-// Validate the address against mnemonic
-func (ctx *Client) verifyAddress() error {
+// Derive address from the mnemonic
+func (ctx *Client) setAddress() error {
 	var tmPubKey tmsecp256k1.PubKeySecp256k1
 	copy(tmPubKey[:], ctx.privateKey.PubKey().SerializeCompressed()[:tmsecp256k1.PubKeySecp256k1Size])
 	ctx.Warnf("%x", ctx.privateKey.PubKey().SerializeCompressed())
@@ -52,10 +51,9 @@ func (ctx *Client) verifyAddress() error {
 	} else {
 		if encoded, err := bech32.Encode(ADDRESS_PREFIX, conv); err != nil {
 			return err
-		} else if ctx.options.Address != encoded {
-			return fmt.Errorf("bad credentials(verify your address and mnemonic)")
+		} else {
+			ctx.Address = encoded
 		}
 	}
-
 	return nil
 }
