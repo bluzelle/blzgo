@@ -2,6 +2,7 @@ package bluzelle
 
 import (
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -51,27 +52,57 @@ func TestCreateValidatesGasInfo(t *testing.T) {
 	assert.True(err != nil) // todo check details
 }
 
-// func TestCreateKeyWithSymbols(t *testing.T) {
-// 	assert := assert.New(t)
+func TestCreateKeyWithSymbols(t *testing.T) {
+	//assert := assert.New(t)
 
-// 	ctx := &Test{}
-// 	if err := ctx.TestSetUp(); err != nil {
-// 		t.Fatalf("%s", err)
-// 	}
-// 	defer ctx.TestTearDown()
+	ctx := &Test{}
+	if err := ctx.TestSetUp(); err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer ctx.TestTearDown()
 
-// 	key := "#{@key1}#$%&"
-// 	val := ctx.Value1
+	key := ctx.Key1 + " !\"#$%&'()*+,-.0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+	val := ctx.Value1
 
-// 	if err := ctx.Client.Create(key, val, TestGasInfo(), nil); err != nil {
-// 		t.Fatalf("%s", err)
-// 	}
-// 	if v, err := ctx.Client.Read(key); err != nil {
-// 		t.Fatalf("%s", err)
-// 	} else {
-// 		assert.Equal(v, val)
-// 	}
-// }
+	if err := ctx.Client.Create(key, val, TestGasInfo(), nil); err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	// if v, err := ctx.Client.Read(key); err != nil {
+	// 	t.Fatalf("%s", err)
+	// } else {
+	// 	assert.Equal(v, val)
+	// }
+
+	if keys, err := ctx.Client.Keys(); err != nil {
+		t.Fatalf("%s", err)
+	} else {
+		found := false
+		t.Logf("%+v", keys)
+		for _, k := range keys {
+			if k == key {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("key(%s) was not found in (%+v)", ctx.Key1, keys)
+		}
+	}
+}
+
+func TestCreatesFailsIfKeyContainsSlash(t *testing.T) {
+	assert := assert.New(t)
+
+	ctx := &Test{}
+	if err := ctx.TestSetUp(); err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer ctx.TestTearDown()
+
+	err := ctx.Client.Create("123/", ctx.Value1, TestGasInfo(), nil)
+	assert.True(err != nil)
+	assert.True(strings.Contains(err.Error(), "Key cannot contain a slash"))
+}
 
 func TestUpdate(t *testing.T) {
 	assert := assert.New(t)
@@ -388,8 +419,15 @@ func TestTxKeys(t *testing.T) {
 	if keys, err := ctx.Client.TxKeys(TestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
-		latest := keys[len(keys)-1]
-		assert.Equal(latest, ctx.Key1)
+		found := false
+		for _, k := range keys {
+			if k == ctx.Key1 {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("key(%s) was not found in (%+v)", ctx.Key1, keys)
+		}
 	}
 }
 
@@ -417,9 +455,15 @@ func TestTxKeyValues(t *testing.T) {
 	if kvs, err := ctx.Client.TxKeyValues(TestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
-		latest := kvs[len(kvs)-1]
-		assert.Equal(latest.Key, ctx.Key1)
-		assert.Equal(latest.Value, ctx.Value1)
+		found := false
+		for _, kv := range kvs {
+			if kv.Key == ctx.Key1 {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("key(%s) was not found in (%+v)", ctx.Key1, kvs)
+		}
 	}
 }
 

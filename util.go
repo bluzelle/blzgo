@@ -1,13 +1,21 @@
 package bluzelle
 
 import (
+	"fmt"
 	"github.com/apex/log"
 	clih "github.com/apex/log/handlers/cli"
 	"github.com/joho/godotenv"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
+
+const KEY_IS_REQUIRED string = "Key is required"
+const VALUE_IS_REQUIRED string = "Value is required"
+const KEY_CANNOT_CONTAIN_A_SLASH string = "Key cannot contain a slash"
+const NEW_KEY_IS_REQUIRED string = "New Key is required"
 
 type Test struct {
 	Client *Client
@@ -92,22 +100,22 @@ func TestAddress() string {
 }
 
 func sanitizeString(s string) string {
-	return s
-	// return re.ReplaceAllStringFunc(s, sanitizeStringToken)
-	// s.gsub(/([&<>])/) { |token|
-	// 	"\\u00#{token[0].ord.to_s(16)}"
-	// }
+	re := regexp.MustCompile(`[&<>]`)
+	z := re.ReplaceAllStringFunc(s, sanitizeStringToken)
+	return z
 }
 
-// func sanitizeStringToken(token string) {
-// 	return "\\u00#{token[0].ord.to_s(16)}"
-// }
+func sanitizeStringToken(token string) string {
+	return fmt.Sprintf("\\u00%x", int([]rune(token)[0]))
+}
 
 func encodeSafe(s string) string {
-	return s
-	// return re.ReplaceAllStringFunc(s, sanitizeStringToken)
+	return UrlPathEscape(s)
 }
 
-// func encodeSafeToken(token string) {
-// 	return "%#{token[0].ord.to_s(16)}"
-// }
+func validateKey(key string) error {
+	if strings.Contains(key, "/") {
+		return fmt.Errorf("%s", KEY_CANNOT_CONTAIN_A_SLASH)
+	}
+	return nil
+}

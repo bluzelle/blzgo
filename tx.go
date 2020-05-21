@@ -11,6 +11,15 @@ const INVALID_LEASE_TIME = "Invalid lease time"
 //
 
 func (ctx *Client) Create(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
+	if key == "" {
+		return fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return err
+	}
+	if value == "" {
+		return fmt.Errorf(VALUE_IS_REQUIRED)
+	}
 	var lease int64
 	if leaseInfo != nil {
 		lease = leaseInfo.ToBlocks()
@@ -38,6 +47,16 @@ func (ctx *Client) Create(key string, value string, gasInfo *GasInfo, leaseInfo 
 //
 
 func (ctx *Client) Update(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
+	if key == "" {
+		return fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return err
+	}
+	if value == "" {
+		return fmt.Errorf(VALUE_IS_REQUIRED)
+	}
+
 	var lease int64
 	if leaseInfo != nil {
 		lease = leaseInfo.ToBlocks()
@@ -65,6 +84,13 @@ func (ctx *Client) Update(key string, value string, gasInfo *GasInfo, leaseInfo 
 //
 
 func (ctx *Client) Delete(key string, gasInfo *GasInfo) error {
+	if key == "" {
+		return fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return err
+	}
+
 	transaction := &Transaction{
 		Key:                key,
 		ApiRequestMethod:   "DELETE",
@@ -82,6 +108,19 @@ func (ctx *Client) Delete(key string, gasInfo *GasInfo) error {
 //
 
 func (ctx *Client) Rename(key string, newKey string, gasInfo *GasInfo) error {
+	if key == "" {
+		return fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return err
+	}
+	if newKey == "" {
+		return fmt.Errorf(NEW_KEY_IS_REQUIRED)
+	}
+	if err := validateKey(newKey); err != nil {
+		return err
+	}
+
 	transaction := &Transaction{
 		Key:                key,
 		NewKey:             newKey,
@@ -116,6 +155,19 @@ func (ctx *Client) DeleteAll(gasInfo *GasInfo) error {
 //
 
 func (ctx *Client) MultiUpdate(keyValues []*KeyValue, gasInfo *GasInfo) error {
+	// if len(keyValues) == 0 {
+	// 	return fmt.Errorf(KEY_VALUES_ARE_REQUIRED)
+	// }
+	for _, kv := range keyValues {
+		key := kv.Key
+		if key == "" {
+			return fmt.Errorf(KEY_IS_REQUIRED)
+		}
+		if err := validateKey(key); err != nil {
+			return err
+		}
+	}
+
 	transaction := &Transaction{
 		KeyValues:          keyValues,
 		ApiRequestMethod:   "POST",
@@ -133,16 +185,24 @@ func (ctx *Client) MultiUpdate(keyValues []*KeyValue, gasInfo *GasInfo) error {
 //
 
 func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
-	if leaseInfo == nil {
-		return fmt.Errorf("lease is required")
+	if key == "" {
+		return fmt.Errorf(KEY_IS_REQUIRED)
 	}
-	if leaseInfo.ToBlocks() < 0 {
+	if err := validateKey(key); err != nil {
+		return err
+	}
+
+	var lease int64
+	if leaseInfo != nil {
+		lease = leaseInfo.ToBlocks()
+	}
+	if lease < 0 {
 		return fmt.Errorf("%s", INVALID_LEASE_TIME)
 	}
 
 	transaction := &Transaction{
 		Key:                key,
-		Lease:              leaseInfo.ToBlocks(),
+		Lease:              lease,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/renewlease",
 		GasInfo:            gasInfo,
@@ -158,15 +218,16 @@ func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo
 //
 
 func (ctx *Client) RenewLeaseAll(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
-	if leaseInfo == nil {
-		return fmt.Errorf("lease is required")
+	var lease int64
+	if leaseInfo != nil {
+		lease = leaseInfo.ToBlocks()
 	}
-	if leaseInfo.ToBlocks() < 0 {
+	if lease < 0 {
 		return fmt.Errorf("%s", INVALID_LEASE_TIME)
 	}
 
 	transaction := &Transaction{
-		Lease:              leaseInfo.ToBlocks(),
+		Lease:              lease,
 		ApiRequestMethod:   "POST",
 		ApiRequestEndpoint: "/crud/renewleaseall",
 		GasInfo:            gasInfo,
@@ -186,6 +247,13 @@ func (ctx *Client) RenewAllLeases(gasInfo *GasInfo, leaseInfo *LeaseInfo) error 
 //
 
 func (ctx *Client) TxRead(key string, gasInfo *GasInfo) (string, error) {
+	if key == "" {
+		return "", fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return "", err
+	}
+
 	transaction := &Transaction{
 		Key:                key,
 		ApiRequestMethod:   "POST",
@@ -209,6 +277,13 @@ func (ctx *Client) TxRead(key string, gasInfo *GasInfo) (string, error) {
 //
 
 func (ctx *Client) TxHas(key string, gasInfo *GasInfo) (bool, error) {
+	if key == "" {
+		return false, fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return false, err
+	}
+
 	transaction := &Transaction{
 		Key:                key,
 		ApiRequestMethod:   "POST",
@@ -302,6 +377,13 @@ func (ctx *Client) TxKeyValues(gasInfo *GasInfo) ([]*KeyValue, error) {
 //
 
 func (ctx *Client) TxGetLease(key string, gasInfo *GasInfo) (int64, error) {
+	if key == "" {
+		return 0, fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return 0, err
+	}
+
 	transaction := &Transaction{
 		Key:                key,
 		ApiRequestMethod:   "POST",

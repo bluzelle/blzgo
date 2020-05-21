@@ -2,6 +2,7 @@ package bluzelle
 
 import (
 	"fmt"
+
 	"github.com/apex/log"
 	"github.com/btcsuite/btcd/btcec"
 )

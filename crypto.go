@@ -44,7 +44,7 @@ func (ctx *Client) setPrivateKey() error {
 func (ctx *Client) setAddress() error {
 	var tmPubKey tmsecp256k1.PubKeySecp256k1
 	copy(tmPubKey[:], ctx.privateKey.PubKey().SerializeCompressed()[:tmsecp256k1.PubKeySecp256k1Size])
-	ctx.Warnf("%x", ctx.privateKey.PubKey().SerializeCompressed())
+	// ctx.Warnf("%x", ctx.privateKey.PubKey().SerializeCompressed())
 	// Get bech32 address
 	if conv, err := bech32.ConvertBits(tmPubKey.Address().Bytes(), 8, 5, true); err != nil {
 		return err

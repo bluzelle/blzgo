@@ -17,7 +17,14 @@ type ReadResponse struct {
 }
 
 func (ctx *Client) Read(key string) (string, error) {
-	body, err := ctx.APIQuery("/crud/read/" + ctx.options.UUID + "/" + key)
+	if key == "" {
+		return "", fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return "", err
+	}
+
+	body, err := ctx.APIQuery("/crud/read/" + ctx.options.UUID + "/" + encodeSafe(key))
 	if err != nil {
 		return "", err
 	}
@@ -31,7 +38,14 @@ func (ctx *Client) Read(key string) (string, error) {
 }
 
 func (ctx *Client) ProvenRead(key string) (string, error) {
-	body, err := ctx.APIQuery("/crud/pread/" + ctx.options.UUID + "/" + key)
+	if key == "" {
+		return "", fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return "", err
+	}
+
+	body, err := ctx.APIQuery("/crud/pread/" + ctx.options.UUID + "/" + encodeSafe(key))
 	if err != nil {
 		return "", err
 	}
@@ -55,7 +69,14 @@ type HasResponse struct {
 }
 
 func (ctx *Client) Has(key string) (bool, error) {
-	body, err := ctx.APIQuery("/crud/has/" + ctx.options.UUID + "/" + key)
+	if key == "" {
+		return false, fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return false, err
+	}
+
+	body, err := ctx.APIQuery("/crud/has/" + ctx.options.UUID + "/" + encodeSafe(key))
 	if err != nil {
 		return false, err
 	}
@@ -156,7 +177,14 @@ type GetLeaseResponse struct {
 }
 
 func (ctx *Client) GetLease(key string) (int64, error) {
-	body, err := ctx.APIQuery("/crud/getlease/" + ctx.options.UUID + "/" + key)
+	if key == "" {
+		return 0, fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return 0, err
+	}
+
+	body, err := ctx.APIQuery("/crud/getlease/" + ctx.options.UUID + "/" + encodeSafe(key))
 	if err != nil {
 		return 0, err
 	}
@@ -174,8 +202,8 @@ func (ctx *Client) GetLease(key string) (int64, error) {
 //
 
 type GetNShortestLeasesResponseResultKeyLease struct {
-	Key   string
-	Lease int64
+	Key   string `json:"key"`
+	Lease int64  `json:"lease"`
 }
 
 type GetNShortestLeasesResponseResult struct {
@@ -220,6 +248,7 @@ func (ctx *Client) GetNShortestLeases(n uint64) ([]*GetNShortestLeasesResponseRe
 
 type Account struct {
 	AccountNumber int     `json:"account_number"`
+	Address       string  `json:"address"`
 	Coins         []*Coin `json:"coins"`
 	PublicKey     string  `json:"public_key"`
 	Sequence      int     `json:"sequence"`

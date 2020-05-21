@@ -6,15 +6,16 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/btcsuite/btcd/btcec"
-	tmcrypto "github.com/tendermint/tendermint/crypto"
-	tmsecp256k1 "github.com/tendermint/tendermint/crypto/secp256k1"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/btcsuite/btcd/btcec"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
+	tmsecp256k1 "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 const TX_COMMAND = "/txs"
@@ -113,14 +114,14 @@ type Transaction struct {
 
 type TransactionValidateRequest struct {
 	BaseReq   *TransactionValidateRequestBaseReq `json:"BaseReq"`
-	UUID      string                             `json:"UUID"`
 	Key       string                             `json:"Key,omitempty"`
 	KeyValues []*KeyValue                        `json:"KeyValues,omitempty"`
 	Lease     string                             `json:"Lease,omitempty"`
 	N         string                             `json:"N,omitempty"`
 	NewKey    string                             `json:"NewKey,omitempty"`
-	Value     string                             `json:"Value,omitempty"`
 	Owner     string                             `json:"Owner"`
+	UUID      string                             `json:"UUID"`
+	Value     string                             `json:"Value,omitempty"`
 }
 
 type TransactionValidateRequestBaseReq struct {
@@ -411,8 +412,9 @@ func (ctx *Client) SignTransaction(txn *TransactionBroadcastPayload) (string, er
 	if err != nil {
 		return "", err
 	}
-	ctx.Infof("txn sign %+v", string(payloadBytes))
-	hash := tmcrypto.Sha256(payloadBytes)
+	sanitized := sanitizeString(string(payloadBytes))
+	ctx.Infof("txn sign %+v", sanitized)
+	hash := tmcrypto.Sha256([]byte(sanitized))
 	if s, err := ctx.privateKey.Sign(hash); err != nil {
 		return "", err
 	} else {

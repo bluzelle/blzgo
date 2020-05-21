@@ -7,7 +7,6 @@ import (
 	"github.com/vbstreetz/blzgo"
 	"net/http"
 	"os"
-	"reflect"
 )
 
 var ctx *bluzelle.Client
@@ -63,439 +62,446 @@ func uat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inputs := make([]reflect.Value, len(request.Args))
-	for i, _ := range request.Args {
-		inputs[i] = reflect.ValueOf(request.Args[i])
+	switch request.Method {
+	case "create":
+		if len(request.Args) < 3 {
+			abort(w, fmt.Errorf("key, value and gas_info required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		value, ok := request.Args[1].(string)
+		if !ok {
+			abort(w, fmt.Errorf(VALUE_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[2])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		var leaseInfo *bluzelle.LeaseInfo
+		if len(request.Args) > 3 {
+			if l, err := parseLeaseInfo(request.Args[3]); err != nil {
+				abort(w, err)
+				return
+			} else {
+				leaseInfo = l
+			}
+		}
+		err = ctx.Create(key, value, gasInfo, leaseInfo)
+		respond(&w, nil, err)
+		return
+
+	case "update":
+		if len(request.Args) < 3 {
+			abort(w, fmt.Errorf("key, value and gas_info required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		value, ok := request.Args[1].(string)
+		if !ok {
+			abort(w, fmt.Errorf(VALUE_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[2])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		var leaseInfo *bluzelle.LeaseInfo
+		if len(request.Args) > 3 {
+			if l, err := parseLeaseInfo(request.Args[3]); err != nil {
+				abort(w, err)
+				return
+			} else {
+				leaseInfo = l
+			}
+		}
+		err = ctx.Update(key, value, gasInfo, leaseInfo)
+		respond(&w, nil, err)
+		return
+
+	case "delete":
+		if len(request.Args) < 2 {
+			abort(w, fmt.Errorf("key and gas_info is required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[1])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		err = ctx.Delete(key, gasInfo)
+		respond(&w, nil, err)
+		return
+
+	case "rename":
+		if len(request.Args) < 3 {
+			abort(w, fmt.Errorf("key, new_key and gas_info required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		newKey, ok := request.Args[1].(string)
+		if !ok {
+			abort(w, fmt.Errorf(NEW_KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[2])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		err = ctx.Rename(key, newKey, gasInfo)
+		respond(&w, nil, err)
+		return
+
+	case "delete_all":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("gas_info is required"))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[0])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		err = ctx.DeleteAll(gasInfo)
+		respond(&w, nil, err)
+		return
+
+	case "multi_update":
+		kvsMap, ok := request.Args[0].([]interface{})
+		if !ok {
+			respond(&w, nil, fmt.Errorf("could not parse key values: %+v", request.Args[0]))
+			return
+		}
+
+		keyValues := []*bluzelle.KeyValue{}
+
+		for _, arg := range kvsMap {
+			kv := &bluzelle.KeyValue{}
+			kvMap, ok := arg.(map[string]interface{})
+			if !ok {
+				respond(&w, nil, fmt.Errorf("could not parse key values: %v", arg))
+				return
+			}
+			keyArg := kvMap["key"]
+			valueArg := kvMap["value"]
+
+			if keyArg != nil {
+				if key, ok := keyArg.(string); !ok {
+					respond(&w, nil, fmt.Errorf("could not parse key in %v", kvMap))
+					return
+				} else {
+					kv.Key = key
+				}
+			}
+			if valueArg != nil {
+				if value, ok := valueArg.(string); !ok {
+					respond(&w, nil, fmt.Errorf("could not parse value in %v", kvMap))
+					return
+				} else {
+					kv.Value = value
+				}
+			}
+
+			keyValues = append(keyValues, kv)
+		}
+		gasInfo, err := parseGasInfo(request.Args[1])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		err = ctx.MultiUpdate(keyValues, gasInfo)
+		respond(&w, nil, err)
+		return
+
+	case "renew_lease":
+		if len(request.Args) < 2 {
+			abort(w, fmt.Errorf("key and gas_info required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[1])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		var leaseInfo *bluzelle.LeaseInfo
+		if len(request.Args) > 2 {
+			if l, err := parseLeaseInfo(request.Args[2]); err != nil {
+				abort(w, err)
+				return
+			} else {
+				leaseInfo = l
+			}
+		}
+		err = ctx.RenewLease(key, gasInfo, leaseInfo)
+		respond(&w, nil, err)
+		return
+
+	case "renew_lease_all":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("gas_info is required"))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[0])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		var leaseInfo *bluzelle.LeaseInfo
+		if len(request.Args) > 1 {
+			if l, err := parseLeaseInfo(request.Args[1]); err != nil {
+				abort(w, err)
+				return
+			} else {
+				leaseInfo = l
+			}
+		}
+		err = ctx.RenewLeaseAll(gasInfo, leaseInfo)
+		respond(&w, nil, err)
+		return
+
+	//
+
+	case "read":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("key is required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		if len(request.Args) == 1 {
+			v, err := ctx.Read(key)
+			respond(&w, v, err)
+			return
+		} else {
+			v, err := ctx.ProvenRead(key)
+			respond(&w, v, err)
+			return
+		}
+		return
+
+	case "has":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("key is required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		v, err := ctx.Has(key)
+		respond(&w, v, err)
+		return
+
+	case "count":
+		v, err := ctx.Count()
+		respond(&w, v, err)
+		return
+
+	case "keys":
+		v, err := ctx.Keys()
+		respond(&w, v, err)
+		return
+
+	case "key_values":
+		v, err := ctx.KeyValues()
+		respond(&w, v, err)
+		return
+
+	case "get_lease":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("key is required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		v, err := ctx.GetLease(key)
+		respond(&w, v, err)
+		return
+
+	case "get_n_shortest_leases":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("n required"))
+			return
+		}
+		n, ok := request.Args[0].(float64)
+		if !ok {
+			abort(w, fmt.Errorf(INVALID_VALUE_SPECIFIED))
+			return
+		}
+		v, err := ctx.GetNShortestLeases(uint64(n))
+		respond(&w, v, err)
+		return
+
+	//
+
+	case "tx_read":
+		if len(request.Args) < 2 {
+			abort(w, fmt.Errorf("key and gas_info required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[1])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		v, err := ctx.TxRead(key, gasInfo)
+		respond(&w, v, err)
+		return
+
+	case "tx_has":
+		if len(request.Args) < 2 {
+			abort(w, fmt.Errorf("key and gas_info required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[1])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		v, err := ctx.TxHas(key, gasInfo)
+		respond(&w, v, err)
+		return
+
+	case "tx_count":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("gas_info required"))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[0])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		v, err := ctx.TxCount(gasInfo)
+		respond(&w, v, err)
+		return
+
+	case "tx_keys":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("gas_info required"))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[0])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		v, err := ctx.TxKeys(gasInfo)
+		respond(&w, v, err)
+		return
+
+	case "tx_key_values":
+		if len(request.Args) < 1 {
+			abort(w, fmt.Errorf("gas_info required"))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[0])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		v, err := ctx.TxKeyValues(gasInfo)
+		respond(&w, v, err)
+		return
+
+	case "tx_get_lease":
+		if len(request.Args) < 2 {
+			abort(w, fmt.Errorf("key and gas_info required"))
+			return
+		}
+		key, ok := request.Args[0].(string)
+		if !ok {
+			abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[1])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		v, err := ctx.TxGetLease(key, gasInfo)
+		respond(&w, v, err)
+		return
+
+	case "tx_get_n_shortest_leases":
+		if len(request.Args) < 2 {
+			abort(w, fmt.Errorf("N and gas_info required"))
+			return
+		}
+		n, ok := request.Args[0].(float64)
+		if !ok {
+			abort(w, fmt.Errorf(INVALID_VALUE_SPECIFIED))
+			return
+		}
+		gasInfo, err := parseGasInfo(request.Args[1])
+		if err != nil {
+			abort(w, err)
+			return
+		}
+		v, err := ctx.TxGetNShortestLeases(uint64(n), gasInfo)
+		respond(&w, v, err)
+		return
+
+	//
+
+	case "account":
+		v, err := ctx.Account()
+		respond(&w, v, err)
+		return
+
+	case "version":
+		v, err := ctx.Version()
+		respond(&w, v, err)
+		return
+
+	//
+
+	default:
+		abort(w, fmt.Errorf("unsupported method: %s", request.Method))
+		return
 	}
-
-	result := reflect.ValueOf(ctx).MethodByName(request.Method).Call(inputs)
-	if e := result[1].Interface(); e != nil {
-		err = e.(error)
-	} else {
-		err = nil
-	}
-
-	respond(&w, result[0].Interface(), err)
-	return
-
-	// switch request.Method {
-	// case "create":
-	// 	if len(request.Args) < 3 {
-	// 		abort(w, fmt.Errorf("key, value and gas_info required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	value, ok := request.Args[1].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[2])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	var leaseInfo *bluzelle.LeaseInfo
-	// 	if len(request.Args) > 3 {
-	// 		if l, err := parseLeaseInfo(request.Args[3]); err != nil {
-	// 			abort(w, err)
-	// 			return
-	// 		} else {
-	// 			leaseInfo = l
-	// 		}
-	// 	}
-	// 	err = ctx.Create(key, value, gasInfo, leaseInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// case "update":
-	// 	if len(request.Args) < 3 {
-	// 		abort(w, fmt.Errorf("key, value and gas_info required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	value, ok := request.Args[1].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[2])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	var leaseInfo *bluzelle.LeaseInfo
-	// 	if len(request.Args) > 3 {
-	// 		if l, err := parseLeaseInfo(request.Args[3]); err != nil {
-	// 			abort(w, err)
-	// 			return
-	// 		} else {
-	// 			leaseInfo = l
-	// 		}
-	// 	}
-	// 	err = ctx.Update(key, value, gasInfo, leaseInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// case "delete":
-	// 	if len(request.Args) < 2 {
-	// 		abort(w, fmt.Errorf("key and gas_info is required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[1])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	err = ctx.Delete(key, gasInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// case "rename":
-	// 	if len(request.Args) < 3 {
-	// 		abort(w, fmt.Errorf("key, new_key and gas_info required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	newKey, ok := request.Args[1].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(NEW_KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[2])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	err = ctx.Rename(key, newKey, gasInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// case "delete_all":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("gas_info is required"))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[0])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	err = ctx.DeleteAll(gasInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// case "multi_update":
-	// 	keyValues := []*bluzelle.KeyValue{}
-	// 	for i := 0; i < ((len(request.Args) / 2) * 2); i = i + 2 {
-	// 		keyValues = append(keyValues, &bluzelle.KeyValue{
-	// 			Key:   request.Args[i].(string),
-	// 			Value: request.Args[i+1].(string),
-	// 		})
-	// 	}
-	// 	gasInfoIndex := len(request.Args)
-	// 	if gasInfoIndex%2 == 0 {
-	// 		gasInfoIndex = -1
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[gasInfoIndex])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	err = ctx.MultiUpdate(keyValues, gasInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// case "renew_lease":
-	// 	if len(request.Args) < 2 {
-	// 		abort(w, fmt.Errorf("key and gas_info required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[1])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	var leaseInfo *bluzelle.LeaseInfo
-	// 	if len(request.Args) > 2 {
-	// 		if l, err := parseLeaseInfo(request.Args[2]); err != nil {
-	// 			abort(w, err)
-	// 			return
-	// 		} else {
-	// 			leaseInfo = l
-	// 		}
-	// 	}
-	// 	err = ctx.RenewLease(key, gasInfo, leaseInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// case "renew_all_leases":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("gas_info is required"))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[0])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	var leaseInfo *bluzelle.LeaseInfo
-	// 	if len(request.Args) > 1 {
-	// 		if l, err := parseLeaseInfo(request.Args[1]); err != nil {
-	// 			abort(w, err)
-	// 			return
-	// 		} else {
-	// 			leaseInfo = l
-	// 		}
-	// 	}
-	// 	err = ctx.RenewLeaseAll(gasInfo, leaseInfo)
-	// 	respond(&w, nil, err)
-	// 	return
-	//
-	// //
-	//
-	// case "read":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("key is required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	if len(request.Args) == 1 {
-	// 		v, err := ctx.Read(key)
-	// 		respond(&w, v, err)
-	// 		return
-	// 	} else {
-	// 		v, err := ctx.ProvenRead(key)
-	// 		respond(&w, v, err)
-	// 		return
-	// 	}
-	// 	return
-	//
-	// case "has":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("key is required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	v, err := ctx.Has(key)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "count":
-	// 	v, err := ctx.Count()
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "keys":
-	// 	v, err := ctx.Keys()
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "key_values":
-	// 	v, err := ctx.KeyValues()
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "get_lease":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("key is required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	v, err := ctx.GetLease(key)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "get_n_shortest_leases":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("n required"))
-	// 		return
-	// 	}
-	// 	n, ok := request.Args[0].(uint64)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(INVALID_VALUE_SPECIFIED))
-	// 		return
-	// 	}
-	// 	v, err := ctx.GetNShortestLeases(n)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// //
-	//
-	// case "tx_read":
-	// 	if len(request.Args) < 2 {
-	// 		abort(w, fmt.Errorf("key and gas_info required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[1])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	v, err := ctx.TxRead(key, gasInfo)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "tx_has":
-	// 	if len(request.Args) < 2 {
-	// 		abort(w, fmt.Errorf("key and gas_info required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[1])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	v, err := ctx.TxHas(key, gasInfo)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "tx_count":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("gas_info required"))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[0])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	v, err := ctx.TxCount(gasInfo)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "tx_keys":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("gas_info required"))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[0])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	v, err := ctx.TxKeys(gasInfo)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "tx_key_values":
-	// 	if len(request.Args) < 1 {
-	// 		abort(w, fmt.Errorf("gas_info required"))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[0])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	v, err := ctx.TxKeyValues(gasInfo)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "tx_get_lease":
-	// 	if len(request.Args) < 2 {
-	// 		abort(w, fmt.Errorf("key and gas_info required"))
-	// 		return
-	// 	}
-	// 	key, ok := request.Args[0].(string)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(KEY_MUST_BE_A_STRING))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[1])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	v, err := ctx.TxGetLease(key, gasInfo)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "tx_get_n_shortest_leases":
-	// 	if len(request.Args) < 2 {
-	// 		abort(w, fmt.Errorf("N and gas_info required"))
-	// 		return
-	// 	}
-	// 	n, ok := request.Args[0].(uint64)
-	// 	if !ok {
-	// 		abort(w, fmt.Errorf(INVALID_VALUE_SPECIFIED))
-	// 		return
-	// 	}
-	// 	gasInfo, err := parseGasInfo(request.Args[1])
-	// 	if err != nil {
-	// 		abort(w, err)
-	// 		return
-	// 	}
-	// 	v, err := ctx.TxGetNShortestLeases(n, gasInfo)
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// //
-	//
-	// case "account":
-	// 	v, err := ctx.Account()
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// case "version":
-	// 	v, err := ctx.Version()
-	// 	respond(&w, v, err)
-	// 	return
-	//
-	// //
-	//
-	// default:
-	// 	abort(w, fmt.Errorf("unsupported method: %s", request.Method))
-	// 	return
-	// }
-}
-
-func abort(w http.ResponseWriter, err error) {
-	http.Error(w, fmt.Sprintf("%s", err), http.StatusBadRequest)
 }
 
 func parseGasInfo(arg interface{}) (*bluzelle.GasInfo, error) {
@@ -536,7 +542,8 @@ func parseLeaseInfo(arg interface{}) (*bluzelle.LeaseInfo, error) {
 
 	leaseInfoMap, ok := arg.(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("could not parse leaseInfo: %v", leaseInfoMap)
+		// return nil, fmt.Errorf("could not parse leaseInfo: %v", arg)
+		return leaseInfo, nil
 	}
 
 	if leaseInfoMap["days"] != nil {
@@ -571,6 +578,10 @@ func parseLeaseInfo(arg interface{}) (*bluzelle.LeaseInfo, error) {
 	return leaseInfo, nil
 }
 
+func abort(w http.ResponseWriter, err error) {
+	http.Error(w, fmt.Sprintf("%s", err), http.StatusBadRequest)
+}
+
 func respond(w *http.ResponseWriter, v interface{}, err error) {
 	if err != nil {
 		abort(*w, fmt.Errorf("%s", err))
@@ -580,6 +591,6 @@ func respond(w *http.ResponseWriter, v interface{}, err error) {
 	if err != nil {
 		abort(*w, fmt.Errorf("%s", err))
 	}
-	fmt.Fprintf(*w, fmt.Sprintf("%s", response))
+	fmt.Fprint(*w, string(response))
 	return
 }

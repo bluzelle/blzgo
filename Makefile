@@ -140,7 +140,7 @@ test: fmt
 #	@./test.sh
 
 test-spec: fmt
-	@go test . -failfast -test.v -run 'Test$(o)'
+	@go test . -failfast -test.v -run '$(o)'
 
 fmt:
 	@gofmt -w *.go

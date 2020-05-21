@@ -135,8 +135,15 @@ func TestKeys(t *testing.T) {
 	if keys, err := ctx.Client.Keys(); err != nil {
 		t.Fatalf("%s", err)
 	} else {
-		latest := keys[len(keys)-1]
-		assert.Equal(latest, ctx.Key1)
+		found := false
+		for _, k := range keys {
+			if k == ctx.Key1 {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("key(%s) was not found in (%+v)", ctx.Key1, keys)
+		}
 	}
 }
 
@@ -164,9 +171,15 @@ func TestKeyValues(t *testing.T) {
 	if kvs, err := ctx.Client.KeyValues(); err != nil {
 		t.Fatalf("%s", err)
 	} else {
-		latest := kvs[len(kvs)-1]
-		assert.Equal(latest.Key, ctx.Key1)
-		assert.Equal(latest.Value, ctx.Value1)
+		found := false
+		for _, kv := range kvs {
+			if kv.Key == ctx.Key1 {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("key(%s) was not found in (%+v)", ctx.Key1, kvs)
+		}
 	}
 }
 
