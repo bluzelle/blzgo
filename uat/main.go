@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo"
 	"net/http"
 	"os"
+
+	"github.com/apex/log"
+	bluzelle "github.com/vbstreetz/blzgo"
 )
 
 var ctx *bluzelle.Client

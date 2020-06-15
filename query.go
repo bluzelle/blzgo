@@ -284,12 +284,12 @@ func (ctx *Client) Account() (*Account, error) {
 
 //
 
-type VersionResponseApplicationVersion struct {
-	Version string `json:"version"`
-}
-
 type VersionResponse struct {
 	ApplicationVersion *VersionResponseApplicationVersion `json:"application_version"`
+}
+
+type VersionResponseApplicationVersion struct {
+	Version string `json:"version"`
 }
 
 func (ctx *Client) Version() (string, error) {
