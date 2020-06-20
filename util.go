@@ -2,14 +2,15 @@ package bluzelle
 
 import (
 	"fmt"
-	"github.com/apex/log"
-	clih "github.com/apex/log/handlers/cli"
-	"github.com/joho/godotenv"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/apex/log"
+	clih "github.com/apex/log/handlers/cli"
+	"github.com/joho/godotenv"
 )
 
 const KEY_IS_REQUIRED string = "Key is required"
@@ -115,7 +116,7 @@ func encodeSafe(s string) string {
 
 func validateKey(key string) error {
 	if strings.Contains(key, "/") {
-		return fmt.Errorf("%s", KEY_CANNOT_CONTAIN_A_SLASH)
+		return fmt.Errorf(KEY_CANNOT_CONTAIN_A_SLASH)
 	}
 	return nil
 }

@@ -25,7 +25,7 @@ func (ctx *Client) Create(key string, value string, gasInfo *GasInfo, leaseInfo 
 		lease = leaseInfo.ToBlocks()
 	}
 	if lease < 0 {
-		return fmt.Errorf("%s", INVALID_LEASE_TIME)
+		return fmt.Errorf(INVALID_LEASE_TIME)
 	}
 
 	transaction := &Transaction{

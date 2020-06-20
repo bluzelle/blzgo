@@ -102,7 +102,7 @@ This will run the `examples/crud/read.go`.
 
 ### User Acceptance Testing
 
-Please checkout the [UAT.md](https://github.com/vbstreetz/blzgo/blob/master/Readme.md) document for more details.
+Please checkout the [UAT.md](https://github.com/vbstreetz/blzgo/blob/master/UAT.md) document for more details.
 
 ### Licence
 
