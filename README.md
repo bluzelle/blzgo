@@ -6,7 +6,9 @@ Ensure you have a recent version of [Go](https://golang.org) installed.
 
 Grab the package from github:
 
-    $ go get github.com/vbstreetz/blzgo
+```
+go get github.com/vbstreetz/blzgo
+```
 
 Use:
 
@@ -83,13 +85,13 @@ cp .env.sample .env
 2. Install dependencies:
 
 ```
-    $ go get ./...
+go get ./...
 ```
 
 3. Run an example as defined in the `Makefile`, for example, to read the value of an existing key, `foo`, run:
 
 ```
-    $ make read key=foo
+make read key=foo
 ```
 
 This will run the `examples/crud/read.go`.
@@ -97,7 +99,7 @@ This will run the `examples/crud/read.go`.
 ### Integration Tests
 
 ```
-    $ make test
+make test
 ```
 
 ### User Acceptance Testing
