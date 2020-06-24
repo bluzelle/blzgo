@@ -7,7 +7,7 @@ Ensure you have a recent version of [Go](https://golang.org) installed.
 Grab the package from github:
 
 ```
-go get github.com/vbstreetz/blzgo
+go get github.com/bluzelle/blzgo
 ```
 
 Use:
@@ -16,7 +16,7 @@ Use:
 package main
 
 import (
-  "github.com/vbstreetz/blzgo"
+  "github.com/bluzelle/blzgo"
   "log"
 )
 
@@ -24,7 +24,7 @@ func main() {
   // create client
   options := &bluzelle.Options{
     Mnemonic: "...",
-    Endpoint: "http://testnet.public.bluzelle.com:1317",
+    Endpoint: "http://dev.testnet.public.bluzelle.com:1317",
     UUID: "...",
   }
   client, err := bluzelle.NewClient(options)
