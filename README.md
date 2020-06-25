@@ -24,7 +24,7 @@ func main() {
   // create client
   options := &bluzelle.Options{
     Mnemonic: "...",
-    Endpoint: "http://testnet.public.bluzelle.com:1317",
+    Endpoint: "http://dev.testnet.public.bluzelle.com:1317",
     UUID: "...",
   }
   client, err := bluzelle.NewClient(options)
