@@ -7,7 +7,7 @@ Ensure you have a recent version of [Go](https://golang.org) installed.
 Grab the package from github:
 
 ```
-go get github.com/vbstreetz/blzgo
+go get github.com/bluzelle/blzgo
 ```
 
 Use:
@@ -16,7 +16,7 @@ Use:
 package main
 
 import (
-  "github.com/vbstreetz/blzgo"
+  "github.com/bluzelle/blzgo"
   "log"
 )
 
@@ -104,7 +104,7 @@ make test
 
 ### User Acceptance Testing
 
-Please checkout the [UAT.md](https://github.com/vbstreetz/blzgo/blob/master/UAT.md) document for more details.
+Please checkout the [UAT.md](https://github.com/bluzelle/blzgo/blob/master/UAT.md) document for more details.
 
 ### Licence
 

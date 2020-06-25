@@ -29,9 +29,9 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 4. Clone the project:
 
 ```
-mkdir -p ~/go/src/github.com/vbstreetz
-cd  ~/go/src/github.com/vbstreetz
-git clone https://github.com/vbstreetz/blzgo.git
+mkdir -p ~/go/src/github.com/bluzelle
+cd  ~/go/src/github.com/bluzelle
+git clone https://github.com/bluzelle/blzgo.git
 cd blzgo
 ```
 
@@ -61,5 +61,5 @@ This will run all the tests in the `test` directory using the same environment s
 
 ```
 PASS
-ok  	github.com/vbstreetz/blzgo	231.143s
+ok  	github.com/bluzelle/blzgo	231.143s
 ```

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/apex/log"
-	bluzelle "github.com/vbstreetz/blzgo"
+	bluzelle "github.com/bluzelle/blzgo"
 )
 
 var ctx *bluzelle.Client

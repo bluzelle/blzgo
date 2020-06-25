@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo"
 	"strconv"
 	"time"
+
+	"github.com/apex/log"
+	bluzelle "github.com/bluzelle/blzgo"
 )
 
 //

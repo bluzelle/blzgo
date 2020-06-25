@@ -1,4 +1,4 @@
-module github.com/vbstreetz/blzgo
+module github.com/bluzelle/blzgo
 
 go 1.14
 

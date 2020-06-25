@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/apex/log"
-	"github.com/vbstreetz/blzgo"
 	"strconv"
 	"time"
+
+	"github.com/apex/log"
+	bluzelle "github.com/bluzelle/blzgo"
 )
 
 func main() {
