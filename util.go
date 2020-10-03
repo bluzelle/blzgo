@@ -90,13 +90,13 @@ func LoadEnv() {
 	}
 }
 
-func TestGasInfo() *GasInfo {
+func GetTestGasInfo() *GasInfo {
 	return &GasInfo{
 		MaxFee: 4000001,
 	}
 }
 
-func TestAddress() string {
+func GetTestAddress() string {
 	return os.Getenv("ADDRESS")
 }
 

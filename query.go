@@ -247,11 +247,16 @@ func (ctx *Client) GetNShortestLeases(n uint64) ([]*GetNShortestLeasesResponseRe
 //
 
 type Account struct {
-	AccountNumber int     `json:"account_number"`
-	Address       string  `json:"address"`
-	Coins         []*Coin `json:"coins"`
-	PublicKey     string  `json:"public_key"`
-	Sequence      int     `json:"sequence"`
+	AccountNumber int              `json:"account_number"`
+	Address       string           `json:"address"`
+	Coins         []*Coin          `json:"coins"`
+	PublicKey     AccountPublicKey `json:"public_key"`
+	Sequence      int              `json:"sequence"`
+}
+
+type AccountPublicKey struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
 
 type Coin struct {
@@ -259,8 +264,16 @@ type Coin struct {
 	Amount string `json:"amount"`
 }
 
+type AccountResponseResultAccount struct {
+	AccountNumber string           `json:"account_number"`
+	Address       string           `json:"address"`
+	Coins         []*Coin          `json:"coins"`
+	PublicKey     AccountPublicKey `json:"public_key"`
+	Sequence      string           `json:"sequence"`
+}
+
 type AccountResponseResult struct {
-	Value *Account `json:"value"`
+	Value *AccountResponseResultAccount `json:"value"`
 }
 
 type AccountResponse struct {
@@ -279,7 +292,22 @@ func (ctx *Client) Account() (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
-	return res.Result.Value, nil
+	account := res.Result.Value
+	accountNumber, err := strconv.Atoi(account.AccountNumber)
+	if err != nil {
+		return nil, err
+	}
+	sequence, err := strconv.Atoi(account.Sequence)
+	if err != nil {
+		return nil, err
+	}
+	return &Account{
+		AccountNumber: accountNumber,
+		Address:       account.Address,
+		Coins:         account.Coins,
+		PublicKey:     account.PublicKey,
+		Sequence:      sequence,
+	}, nil
 }
 
 //

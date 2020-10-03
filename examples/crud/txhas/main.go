@@ -25,7 +25,7 @@ func main() {
 
 	log.Infof("checking if key(%s) exists...", key)
 
-	if v, err := ctx.TxHas(key, bluzelle.TestGasInfo()); err != nil {
+	if v, err := ctx.TxHas(key, bluzelle.GetTestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("key(%s) exist status: %t", key, v)

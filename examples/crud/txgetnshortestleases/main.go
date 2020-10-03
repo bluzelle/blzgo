@@ -31,7 +31,7 @@ func main() {
 
 	log.Infof("getting n shortest leases n(%d)...", n)
 
-	if keyLeases, err := ctx.TxGetNShortestLeases(uint64(n), bluzelle.TestGasInfo()); err != nil {
+	if keyLeases, err := ctx.TxGetNShortestLeases(uint64(n), bluzelle.GetTestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("leases:")

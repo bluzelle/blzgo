@@ -26,7 +26,7 @@ func main() {
 
 	log.Infof("renaming key(%s) to new key(%s)...", key, newKey)
 
-	if err := ctx.Rename(key, newKey, bluzelle.TestGasInfo()); err != nil {
+	if err := ctx.Rename(key, newKey, bluzelle.GetTestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("renamed key")

@@ -31,7 +31,7 @@ func main() {
 
 	log.Infof("renewing lease(%ds)...", leaseInfo.ToBlocks())
 
-	if err := ctx.RenewAllLeases(bluzelle.TestGasInfo(), leaseInfo); err != nil {
+	if err := ctx.RenewAllLeases(bluzelle.GetTestGasInfo(), leaseInfo); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("renewed leases")

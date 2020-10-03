@@ -29,7 +29,7 @@ func main() {
 	value := "bar"
 
 	// create key
-	if err := ctx.Create(key, value, bluzelle.TestGasInfo(), nil); err != nil {
+	if err := ctx.Create(key, value, bluzelle.GetTestGasInfo(), nil); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("created key")
@@ -46,14 +46,14 @@ func main() {
 func withTransaction(ctx *bluzelle.Client) {
 	txn := ctx.Transaction()
 	for i := 0; i < 10; i++ {
-		if err := txn.Create(fmt.Sprintf("%d", i), "value", bluzelle.TestGasInfo(), nil); err != nil {
-			log.Fatalf("%s", err)
+		if txnLocalId, err := txn.Create(fmt.Sprintf("%d", i), "value", bluzelle.GetTestGasInfo(), nil); err != nil {
+			log.Fatalf("error initializing txn(%i): %s", err, txnLocalId)
 		} else {
 			log.Infof("created key")
 		}
 	}
-	if err := txn.Execute(); err != nil {
-		log.Fatalf("%s", err)
+	if txnLocalId, err := txn.Execute(); err != nil {
+		log.Fatalf("error completing txn(%s): %s", err, txnLocalId)
 	} else {
 		log.Infof("created key")
 	}
@@ -61,7 +61,7 @@ func withTransaction(ctx *bluzelle.Client) {
 
 func withoutTransaction(ctx *bluzelle.Client) {
 	for i := 0; i < 10; i++ {
-		if err := ctx.Create(fmt.Sprintf("%d", i), "value", bluzelle.TestGasInfo(), nil); err != nil {
+		if err := ctx.Create(fmt.Sprintf("%d", i), "value", bluzelle.GetTestGasInfo(), nil); err != nil {
 			log.Fatalf("%s", err)
 		} else {
 			log.Infof("created key")
