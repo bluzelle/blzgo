@@ -29,13 +29,17 @@ func (ctx *Client) Create(key string, value string, gasInfo *GasInfo, leaseInfo 
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		Value:              value,
-		Lease:              lease,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/create",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/create",
+		Value: &TransactionMessageValue{
+			Key:   key,
+			Value: value,
+			Lease: strconv.FormatInt(lease, 10),
+		},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -66,13 +70,17 @@ func (ctx *Client) Update(key string, value string, gasInfo *GasInfo, leaseInfo 
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		Value:              value,
-		Lease:              lease,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/update",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/update",
+		Value: &TransactionMessageValue{
+			Key:   key,
+			Value: value,
+			Lease: strconv.FormatInt(lease, 10),
+		},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -92,11 +100,15 @@ func (ctx *Client) Delete(key string, gasInfo *GasInfo) error {
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		ApiRequestMethod:   "DELETE",
-		ApiRequestEndpoint: "/crud/delete",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/delete",
+		Value: &TransactionMessageValue{
+			Key: key,
+		},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -122,12 +134,16 @@ func (ctx *Client) Rename(key string, newKey string, gasInfo *GasInfo) error {
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		NewKey:             newKey,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/rename",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/rename",
+		Value: &TransactionMessageValue{
+			Key:    key,
+			NewKey: newKey,
+		},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -140,10 +156,13 @@ func (ctx *Client) Rename(key string, newKey string, gasInfo *GasInfo) error {
 
 func (ctx *Client) DeleteAll(gasInfo *GasInfo) error {
 	transaction := &Transaction{
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/deleteall",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type:  "crud/deleteall",
+		Value: &TransactionMessageValue{},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -169,11 +188,15 @@ func (ctx *Client) MultiUpdate(keyValues []*KeyValue, gasInfo *GasInfo) error {
 	}
 
 	transaction := &Transaction{
-		KeyValues:          keyValues,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/multiupdate",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/multiupdate",
+		Value: &TransactionMessageValue{
+			KeyValues: keyValues,
+		},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -201,12 +224,16 @@ func (ctx *Client) RenewLease(key string, gasInfo *GasInfo, leaseInfo *LeaseInfo
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		Lease:              lease,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/renewlease",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/renewlease",
+		Value: &TransactionMessageValue{
+			Key:   key,
+			Lease: strconv.FormatInt(lease, 10),
+		},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -227,11 +254,15 @@ func (ctx *Client) RenewLeaseAll(gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
 	}
 
 	transaction := &Transaction{
-		Lease:              lease,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/renewleaseall",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/renewleaseall",
+		Value: &TransactionMessageValue{
+			Lease: strconv.FormatInt(lease, 10),
+		},
+	})
 
 	_, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -255,11 +286,15 @@ func (ctx *Client) TxRead(key string, gasInfo *GasInfo) (string, error) {
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/read",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/read",
+		Value: &TransactionMessageValue{
+			Key: key,
+		},
+	})
 
 	body, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -285,11 +320,15 @@ func (ctx *Client) TxHas(key string, gasInfo *GasInfo) (bool, error) {
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/has",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/has",
+		Value: &TransactionMessageValue{
+			Key: key,
+		},
+	})
 
 	body, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -307,10 +346,13 @@ func (ctx *Client) TxHas(key string, gasInfo *GasInfo) (bool, error) {
 //
 func (ctx *Client) TxCount(gasInfo *GasInfo) (int, error) {
 	transaction := &Transaction{
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/count",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type:  "crud/count",
+		Value: &TransactionMessageValue{},
+	})
 
 	body, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -334,10 +376,13 @@ func (ctx *Client) TxCount(gasInfo *GasInfo) (int, error) {
 
 func (ctx *Client) TxKeys(gasInfo *GasInfo) ([]string, error) {
 	transaction := &Transaction{
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/keys",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type:  "crud/keys",
+		Value: &TransactionMessageValue{},
+	})
 
 	body, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -356,10 +401,13 @@ func (ctx *Client) TxKeys(gasInfo *GasInfo) ([]string, error) {
 
 func (ctx *Client) TxKeyValues(gasInfo *GasInfo) ([]*KeyValue, error) {
 	transaction := &Transaction{
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/keyvalues",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type:  "crud/ukeyvalues",
+		Value: &TransactionMessageValue{},
+	})
 
 	body, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -385,11 +433,15 @@ func (ctx *Client) TxGetLease(key string, gasInfo *GasInfo) (int64, error) {
 	}
 
 	transaction := &Transaction{
-		Key:                key,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/getlease",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/getlease",
+		Value: &TransactionMessageValue{
+			Key: key,
+		},
+	})
 
 	body, err := ctx.SendTransaction(transaction)
 	if err != nil {
@@ -409,11 +461,15 @@ func (ctx *Client) TxGetLease(key string, gasInfo *GasInfo) (int64, error) {
 
 func (ctx *Client) TxGetNShortestLeases(n uint64, gasInfo *GasInfo) ([]*GetNShortestLeasesResponseResultKeyLease, error) {
 	transaction := &Transaction{
-		N:                  n,
-		ApiRequestMethod:   "POST",
-		ApiRequestEndpoint: "/crud/getnshortestleases",
-		GasInfo:            gasInfo,
+		GasInfo: gasInfo,
 	}
+
+	transaction.Messages = append(transaction.Messages, &TransactionMessage{
+		Type: "crud/getnshortestleases",
+		Value: &TransactionMessageValue{
+			N: strconv.FormatUint(n, 10),
+		},
+	})
 
 	body, err := ctx.SendTransaction(transaction)
 	if err != nil {

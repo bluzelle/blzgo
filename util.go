@@ -92,7 +92,9 @@ func LoadEnv() {
 
 func GetTestGasInfo() *GasInfo {
 	return &GasInfo{
-		MaxFee: 4000001,
+		MaxFee:   4000001,
+		MaxGas:   200000,
+		GasPrice: 10,
 	}
 }
 

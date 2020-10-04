@@ -93,48 +93,14 @@ type TransactionSignature struct {
 //
 
 type Transaction struct {
-	Key       string
-	KeyValues []*KeyValue
-	Lease     int64
-	N         uint64
-	NewKey    string
-	Value     string
-
-	ApiRequestMethod   string
-	ApiRequestEndpoint string
-	GasInfo            *GasInfo
+	Messages []*TransactionMessage
+	GasInfo  *GasInfo
 
 	done             chan bool
 	result           []byte
 	err              error
 	broadcastRetries int
 }
-
-//
-
-type TransactionValidateRequest struct {
-	BaseReq   *TransactionValidateRequestBaseReq `json:"BaseReq"`
-	Key       string                             `json:"Key,omitempty"`
-	KeyValues []*KeyValue                        `json:"KeyValues,omitempty"`
-	Lease     string                             `json:"Lease,omitempty"`
-	N         string                             `json:"N,omitempty"`
-	NewKey    string                             `json:"NewKey,omitempty"`
-	Owner     string                             `json:"Owner"`
-	UUID      string                             `json:"UUID"`
-	Value     string                             `json:"Value,omitempty"`
-}
-
-type TransactionValidateRequestBaseReq struct {
-	From    string `json:"from"`
-	ChainId string `json:"chain_id"`
-}
-
-type TransactionValidateResponse struct {
-	Type  string                       `json:"type"`
-	Value *TransactionBroadcastPayload `json:"value"`
-}
-
-//
 
 type TransactionBroadcastRequest struct {
 	Transaction *TransactionBroadcastPayload `json:"tx"`
@@ -153,7 +119,7 @@ type TransactionBroadcastResponse struct {
 
 //
 
-type TransactionMsgValue struct {
+type TransactionMessageValue struct {
 	Key       string      `json:"Key,omitempty"`
 	KeyValues []*KeyValue `json:"KeyValues,omitempty"`
 	Lease     string      `json:"Lease,omitempty"`
@@ -164,9 +130,9 @@ type TransactionMsgValue struct {
 	Value     string      `json:"Value,omitempty"`
 }
 
-type TransactionMsg struct {
-	Type  string               `json:"type"`
-	Value *TransactionMsgValue `json:"value"`
+type TransactionMessage struct {
+	Type  string                   `json:"type"`
+	Value *TransactionMessageValue `json:"value"`
 }
 
 //
@@ -174,17 +140,17 @@ type TransactionMsg struct {
 type TransactionBroadcastPayload struct {
 	Fee        *TransactionFee         `json:"fee"`
 	Memo       string                  `json:"memo"`
-	Msg        []*TransactionMsg       `json:"msg"`
+	Msg        []*TransactionMessage   `json:"msg"`
 	Signatures []*TransactionSignature `json:"signatures"`
 }
 
 type TransactionBroadcastPayloadSignPayload struct {
-	AccountNumber string            `json:"account_number"`
-	ChainId       string            `json:"chain_id"`
-	Fee           *TransactionFee   `json:"fee"`
-	Memo          string            `json:"memo"`
-	Msgs          []*TransactionMsg `json:"msgs"`
-	Sequence      string            `json:"sequence"`
+	AccountNumber string                `json:"account_number"`
+	ChainId       string                `json:"chain_id"`
+	Fee           *TransactionFee       `json:"fee"`
+	Memo          string                `json:"memo"`
+	Msgs          []*TransactionMessage `json:"msgs"`
+	Sequence      string                `json:"sequence"`
 }
 
 //
@@ -206,7 +172,7 @@ func (ctx *Client) APIQuery(endpoint string) ([]byte, error) {
 }
 
 func (ctx *Client) APIMutate(method string, endpoint string, payload []byte) ([]byte, error) {
-	url := ctx.options.Endpoint + endpoint
+	url := ctx.options.Endpoint + "/" + endpoint
 
 	ctx.Infof("post %s", url)
 
@@ -241,11 +207,7 @@ func (ctx *Client) SendTransaction(txn *Transaction) ([]byte, error) {
 func (ctx *Client) ProcessTransaction(txn *Transaction) {
 	txn.broadcastRetries = 0
 
-	var result []byte
-	payload, err := ctx.ValidateTransaction(txn)
-	if err == nil {
-		result, err = ctx.BroadcastTransaction(payload, txn.GasInfo)
-	}
+	result, err := ctx.BroadcastTransaction(txn)
 
 	txn.result = result
 	txn.err = err
@@ -253,49 +215,23 @@ func (ctx *Client) ProcessTransaction(txn *Transaction) {
 	close(txn.done)
 }
 
-// Get required min gas
-func (ctx *Client) ValidateTransaction(txn *Transaction) (*TransactionBroadcastPayload, error) {
-	req := &TransactionValidateRequest{
-		BaseReq: &TransactionValidateRequestBaseReq{
-			From:    ctx.Address,
-			ChainId: ctx.options.ChainId,
-		},
-		UUID:      ctx.options.UUID,
-		Key:       txn.Key,
-		KeyValues: txn.KeyValues,
-		Lease:     strconv.FormatInt(txn.Lease, 10),
-		N:         strconv.FormatUint(txn.N, 10),
-		NewKey:    txn.NewKey,
-		Owner:     ctx.Address,
-		Value:     txn.Value,
+func (ctx *Client) BroadcastTransaction(tx *Transaction) ([]byte, error) {
+	txn := &TransactionBroadcastPayload{}
+
+	// Set msg
+	txn.Msg = tx.Messages
+	for _, msg := range txn.Msg {
+		msg.Value.Owner = ctx.Address
+		msg.Value.UUID = ctx.options.UUID
 	}
 
-	reqBytes, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	ctx.Infof("txn init %+v", string(reqBytes))
-	body, err := ctx.APIMutate(txn.ApiRequestMethod, txn.ApiRequestEndpoint, reqBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	ctx.Infof("txn init %+v", string(body))
-
-	res := &TransactionValidateResponse{}
-	err = json.Unmarshal(body, res)
-	if err != nil {
-		return nil, err
-	}
-
-	return res.Value, nil
-}
-
-func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, gasInfo *GasInfo) ([]byte, error) {
 	// Set memo
 	txn.Memo = makeRandomString(32)
 
 	// Set fee
+	txn.Fee = &TransactionFee{}
+
+	gasInfo := tx.GasInfo
 	if gasInfo == nil {
 		return nil, fmt.Errorf("gas_info is required")
 	}
@@ -316,6 +252,10 @@ func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, gasInf
 		amount = gasInfo.MaxFee
 	} else if gasInfo.GasPrice != 0 {
 		amount = gas * gasInfo.GasPrice
+	}
+
+	if gas == 0 {
+		gas = 200000
 	}
 
 	txn.Fee = &TransactionFee{
@@ -356,6 +296,7 @@ func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, gasInf
 	if err != nil {
 		return nil, err
 	}
+
 	// ctx.Infof("txn broadcast response %+v", string(body))
 	// Read txn broadcast response
 	res := &TransactionBroadcastResponse{}
@@ -392,7 +333,7 @@ func (ctx *Client) BroadcastTransaction(txn *TransactionBroadcastPayload, gasInf
 		if err := ctx.setAccount(); err != nil {
 			return nil, err
 		}
-		b, err := ctx.BroadcastTransaction(txn, gasInfo)
+		b, err := ctx.BroadcastTransaction(tx)
 		return b, err
 	}
 

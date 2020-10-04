@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreate(t *testing.T) {
+func TestCreateWithGas(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := &Test{}
@@ -79,7 +79,7 @@ func TestCreateKeyWithSymbols(t *testing.T) {
 		t.Fatalf("%s", err)
 	} else {
 		found := false
-		t.Logf("%+v", keys)
+		// t.Logf("%+v", keys)
 		for _, k := range keys {
 			if k == key {
 				found = true
@@ -221,7 +221,7 @@ func TestDeleteAll(t *testing.T) {
 	if count, err := ctx.Client.Count(); err != nil {
 		t.Fatalf("%s", err)
 	} else {
-		assert.Equal(count, 0)
+		assert.Equal(0, count)
 	}
 }
 

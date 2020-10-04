@@ -36,7 +36,9 @@ func main() {
   value := "bar"
 
   gasInfo := bluzelle.GasInfo{
-    MaxFee: 4000001,
+		MaxFee:   4000001,
+		MaxGas:   200000,
+		GasPrice: 10,
   }
   leaseInfo := bluzelle.LeaseInfo{
     Days: 1,
