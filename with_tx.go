@@ -1,80 +1,77 @@
 package bluzelle
 
-// import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
-// func (ctx *Client) Transaction(uuid string) *MessageTransaction {
-// 	txn := &MessageTransaction{}
+func (ctx *Client) Transaction() *BatchTransaction {
+	txn := &BatchTransaction{
+		client: ctx,
+	}
+	return txn
+}
 
-// 	return txn
-// }
+type BatchTransaction struct {
+	messages []*TransactionMessage
+	client   *Client
+	gasInfo  *GasInfo
+}
 
-// type MessageTransaction struct {
-// }
+func (ctx *BatchTransaction) Create(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
+	if key == "" {
+		return fmt.Errorf(KEY_IS_REQUIRED)
+	}
+	if err := validateKey(key); err != nil {
+		return err
+	}
+	if value == "" {
+		return fmt.Errorf(VALUE_IS_REQUIRED)
+	}
+	var lease int64
+	if leaseInfo != nil {
+		lease = leaseInfo.ToBlocks()
+	}
+	if lease < 0 {
+		return fmt.Errorf(INVALID_LEASE_TIME)
+	}
 
-// func (ctx *Client) MessageTransaction(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
-// 	if key == "" {
-// 		return fmt.Errorf(KEY_IS_REQUIRED)
-// 	}
-// 	if err := validateKey(key); err != nil {
-// 		return err
-// 	}
-// 	if value == "" {
-// 		return fmt.Errorf(VALUE_IS_REQUIRED)
-// 	}
-// 	var lease int64
-// 	if leaseInfo != nil {
-// 		lease = leaseInfo.ToBlocks()
-// 	}
-// 	if lease < 0 {
-// 		return fmt.Errorf(INVALID_LEASE_TIME)
-// 	}
+	ctx.messages = append(ctx.messages, &TransactionMessage{
+		Type: "crud/create",
+		Value: &TransactionMessageValue{
+			Key:   key,
+			Value: value,
+			Lease: strconv.FormatInt(lease, 10),
+		},
+	})
 
-// 	transaction := &Transaction{
-// 		Key:                key,
-// 		Value:              value,
-// 		Lease:              lease,
-// 		ApiRequestMethod:   "POST",
-// 		ApiRequestEndpoint: "/crud/create",
-// 		GasInfo:            gasInfo,
-// 	}
+	if ctx.gasInfo == nil {
+		ctx.gasInfo = gasInfo
+	} else {
+		if gasInfo.MaxFee > ctx.gasInfo.MaxFee {
+			ctx.gasInfo.MaxFee = gasInfo.MaxFee
+		}
+		if gasInfo.MaxGas > ctx.gasInfo.MaxGas {
+			ctx.gasInfo.MaxGas = gasInfo.MaxGas
+		}
+		if gasInfo.GasPrice > ctx.gasInfo.GasPrice {
+			ctx.gasInfo.GasPrice = gasInfo.GasPrice
+		}
+	}
 
-// 	_, err := ctx.SendTransaction(transaction)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	return nil
+}
 
-// func (ctx *MessageTransaction) Execute() error {
-// 	if key == "" {
-// 		return fmt.Errorf(KEY_IS_REQUIRED)
-// 	}
-// 	if err := validateKey(key); err != nil {
-// 		return err
-// 	}
-// 	if value == "" {
-// 		return fmt.Errorf(VALUE_IS_REQUIRED)
-// 	}
-// 	var lease int64
-// 	if leaseInfo != nil {
-// 		lease = leaseInfo.ToBlocks()
-// 	}
-// 	if lease < 0 {
-// 		return fmt.Errorf(INVALID_LEASE_TIME)
-// 	}
+func (ctx *BatchTransaction) Execute() error {
+	txn := &Transaction{
+		GasInfo: ctx.gasInfo,
+	}
 
-// 	transaction := &Transaction{
-// 		Key:                key,
-// 		Value:              value,
-// 		Lease:              lease,
-// 		ApiRequestMethod:   "POST",
-// 		ApiRequestEndpoint: "/crud/create",
-// 		GasInfo:            gasInfo,
-// 	}
+	txn.Messages = append(txn.Messages, ctx.messages...)
 
-// 	_, err := ctx.SendTransaction(transaction)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	_, err := ctx.client.SendTransaction(txn)
+	if err != nil {
+		return err
+	}
+	return nil
+}

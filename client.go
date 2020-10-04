@@ -50,26 +50,6 @@ func (root *Client) UUID(uuid string) *Client {
 	return ctx
 }
 
-func (root *Client) Transaction() *Client {
-	options := &Options{
-		Endpoint: root.options.Endpoint,
-		UUID:     root.options.UUID,
-		ChainId:  root.options.ChainId,
-		Debug:    root.options.Debug,
-	}
-
-	ctx := &Client{
-		options:      options,
-		account:      root.account,
-		privateKey:   root.privateKey,
-		transactions: root.transactions,
-	}
-
-	ctx.setupLogger()
-
-	return ctx
-}
-
 func (ctx *Client) setupLogger() {
 	ctx.logger = log.WithFields(log.Fields{
 		"uuid": ctx.options.UUID,
