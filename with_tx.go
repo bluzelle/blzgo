@@ -1,9 +1,6 @@
 package bluzelle
 
-import (
-	"fmt"
-	"strconv"
-)
+import "fmt"
 
 func (ctx *Client) Transaction() *BatchTransaction {
 	txn := &BatchTransaction{
@@ -16,35 +13,34 @@ type BatchTransaction struct {
 	messages []*TransactionMessage
 	client   *Client
 	gasInfo  *GasInfo
+	result   []byte
 }
 
 func (ctx *BatchTransaction) Create(key string, value string, gasInfo *GasInfo, leaseInfo *LeaseInfo) error {
-	if key == "" {
-		return fmt.Errorf(KEY_IS_REQUIRED)
-	}
-	if err := validateKey(key); err != nil {
+	if msg, err := ctx.client.create(key, value, leaseInfo); err != nil {
 		return err
-	}
-	if value == "" {
-		return fmt.Errorf(VALUE_IS_REQUIRED)
-	}
-	var lease int64
-	if leaseInfo != nil {
-		lease = leaseInfo.ToBlocks()
-	}
-	if lease < 0 {
-		return fmt.Errorf(INVALID_LEASE_TIME)
+	} else {
+		ctx.messages = append(ctx.messages, msg)
 	}
 
-	ctx.messages = append(ctx.messages, &TransactionMessage{
-		Type: "crud/create",
-		Value: &TransactionMessageValue{
-			Key:   key,
-			Value: value,
-			Lease: strconv.FormatInt(lease, 10),
-		},
-	})
+	ctx.updateGas(gasInfo)
 
+	return nil
+}
+
+func (ctx *BatchTransaction) TxRead(key string, gasInfo *GasInfo) error {
+	if msg, err := ctx.client.txRead(key); err != nil {
+		return err
+	} else {
+		ctx.messages = append(ctx.messages, msg)
+	}
+
+	ctx.updateGas(gasInfo)
+
+	return nil
+}
+
+func (ctx *BatchTransaction) updateGas(gasInfo *GasInfo) {
 	if ctx.gasInfo == nil {
 		ctx.gasInfo = gasInfo
 	} else {
@@ -58,20 +54,31 @@ func (ctx *BatchTransaction) Create(key string, value string, gasInfo *GasInfo, 
 			ctx.gasInfo.GasPrice = gasInfo.GasPrice
 		}
 	}
-
-	return nil
 }
 
-func (ctx *BatchTransaction) Execute() error {
+func (ctx *BatchTransaction) Execute() ([]byte, error) {
+	if ctx.result {
+		return nil, fmt.Errorf("transaction was executed")
+	}
+	// if ctx.executing {
+	// 	return nil, fmt.Errorf("transaction was executed")
+	// }
+
 	txn := &Transaction{
 		GasInfo: ctx.gasInfo,
 	}
 
 	txn.Messages = append(txn.Messages, ctx.messages...)
 
-	_, err := ctx.client.SendTransaction(txn)
-	if err != nil {
+	if result, err := ctx.client.SendTransaction(txn); err != nil {
 		return err
+	} else {
+		ctx.result = result
+		return nil
 	}
-	return nil
+}
+
+func (ctx *BatchTransactionResult) GetTxReadResult(index int) (string, error) {
+	// return ctx.client.txRead(ctx.result)
+	return "", nil
 }
