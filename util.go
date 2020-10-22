@@ -17,6 +17,7 @@ const KEY_IS_REQUIRED string = "Key is required"
 const VALUE_IS_REQUIRED string = "Value is required"
 const KEY_CANNOT_CONTAIN_A_SLASH string = "Key cannot contain a slash"
 const NEW_KEY_IS_REQUIRED string = "New Key is required"
+const KEY_VALUES_ARE_REQUIRED string = "Key values are required"
 
 type Test struct {
 	Client *Client
@@ -90,13 +91,15 @@ func LoadEnv() {
 	}
 }
 
-func TestGasInfo() *GasInfo {
+func GetTestGasInfo() *GasInfo {
 	return &GasInfo{
-		MaxFee: 4000001,
+		MaxFee:   4000001,
+		MaxGas:   200000,
+		GasPrice: 10,
 	}
 }
 
-func TestAddress() string {
+func GetTestAddress() string {
 	return os.Getenv("ADDRESS")
 }
 

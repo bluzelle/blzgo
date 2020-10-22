@@ -1,8 +1,9 @@
 package bluzelle
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccount(t *testing.T) {
@@ -49,7 +50,7 @@ func TestRead(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -75,7 +76,7 @@ func TestHas(t *testing.T) {
 		assert.True(!v)
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -100,7 +101,7 @@ func TestCount(t *testing.T) {
 		t.Fatalf("%s", err)
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -128,7 +129,7 @@ func TestKeys(t *testing.T) {
 		}
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -164,7 +165,7 @@ func TestKeyValues(t *testing.T) {
 		}
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -192,7 +193,7 @@ func TestGetLease(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -212,7 +213,7 @@ func TestGetNShortestLeases(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 

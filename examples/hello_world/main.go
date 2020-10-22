@@ -28,7 +28,7 @@ func main() {
 	value := "bar"
 
 	// create key
-	if err := ctx.Create(key, value, bluzelle.TestGasInfo(), nil); err != nil {
+	if err := ctx.Create(key, value, bluzelle.GetTestGasInfo(), nil); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("created key")

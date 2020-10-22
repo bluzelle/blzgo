@@ -1,12 +1,13 @@
 package bluzelle
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestCreate(t *testing.T) {
+func TestCreateWithGas(t *testing.T) {
 	assert := assert.New(t)
 
 	ctx := &Test{}
@@ -15,7 +16,7 @@ func TestCreate(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 	if v, err := ctx.Client.Read(ctx.Key1); err != nil {
@@ -34,7 +35,7 @@ func TestCreateWithLeaseInfo(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), &LeaseInfo{Seconds: 60}); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), &LeaseInfo{Seconds: 60}); err != nil {
 		t.Fatalf("%s", err)
 	}
 }
@@ -64,7 +65,7 @@ func TestCreateKeyWithSymbols(t *testing.T) {
 	key := ctx.Key1 + " !\"#$%&'()*+,-.0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 	val := ctx.Value1
 
-	if err := ctx.Client.Create(key, val, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(key, val, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -78,7 +79,7 @@ func TestCreateKeyWithSymbols(t *testing.T) {
 		t.Fatalf("%s", err)
 	} else {
 		found := false
-		t.Logf("%+v", keys)
+		// t.Logf("%+v", keys)
 		for _, k := range keys {
 			if k == key {
 				found = true
@@ -99,7 +100,7 @@ func TestCreatesFailsIfKeyContainsSlash(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	err := ctx.Client.Create("123/", ctx.Value1, TestGasInfo(), nil)
+	err := ctx.Client.Create("123/", ctx.Value1, GetTestGasInfo(), nil)
 	assert.True(err != nil)
 	assert.True(strings.Contains(err.Error(), "Key cannot contain a slash"))
 }
@@ -113,11 +114,11 @@ func TestUpdate(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if err := ctx.Client.Update(ctx.Key1, ctx.Value2, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Update(ctx.Key1, ctx.Value2, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -137,7 +138,7 @@ func TestDelete(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -147,7 +148,7 @@ func TestDelete(t *testing.T) {
 		assert.Equal(b, true)
 	}
 
-	if err := ctx.Client.Delete(ctx.Key1, TestGasInfo()); err != nil {
+	if err := ctx.Client.Delete(ctx.Key1, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -167,7 +168,7 @@ func TestRename(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -177,7 +178,7 @@ func TestRename(t *testing.T) {
 		assert.True(!b)
 	}
 
-	if err := ctx.Client.Rename(ctx.Key1, ctx.Key2, TestGasInfo()); err != nil {
+	if err := ctx.Client.Rename(ctx.Key1, ctx.Key2, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -203,7 +204,7 @@ func TestDeleteAll(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -213,14 +214,14 @@ func TestDeleteAll(t *testing.T) {
 		assert.True(count >= 1)
 	}
 
-	if err := ctx.Client.DeleteAll(TestGasInfo()); err != nil {
+	if err := ctx.Client.DeleteAll(GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	}
 
 	if count, err := ctx.Client.Count(); err != nil {
 		t.Fatalf("%s", err)
 	} else {
-		assert.Equal(count, 0)
+		assert.Equal(0, count)
 	}
 }
 
@@ -233,7 +234,7 @@ func TestMultiUpdate(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -249,7 +250,7 @@ func TestMultiUpdate(t *testing.T) {
 		&KeyValue{ctx.Key1, "hey"},
 	}
 
-	if err := ctx.Client.MultiUpdate(kvs, TestGasInfo()); err != nil {
+	if err := ctx.Client.MultiUpdate(kvs, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -271,7 +272,7 @@ func TestRenewKeyLease(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -281,7 +282,7 @@ func TestRenewKeyLease(t *testing.T) {
 		assert.True(lease > 20)
 	}
 
-	if err := ctx.Client.RenewLease(ctx.Key1, TestGasInfo(), &LeaseInfo{Seconds: 10}); err != nil {
+	if err := ctx.Client.RenewLease(ctx.Key1, GetTestGasInfo(), &LeaseInfo{Seconds: 10}); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -301,7 +302,7 @@ func TestRenewAllKeyLeases(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -311,7 +312,7 @@ func TestRenewAllKeyLeases(t *testing.T) {
 		assert.True(lease > 20)
 	}
 
-	if err := ctx.Client.RenewAllLeases(TestGasInfo(), &LeaseInfo{Seconds: 10}); err != nil {
+	if err := ctx.Client.RenewAllLeases(GetTestGasInfo(), &LeaseInfo{Seconds: 10}); err != nil {
 		t.Fatalf("%s", err)
 	}
 
@@ -333,11 +334,11 @@ func TestTxRead(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if v, err := ctx.Client.TxRead(ctx.Key1, TestGasInfo()); err != nil {
+	if v, err := ctx.Client.TxRead(ctx.Key1, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		assert.Equal(ctx.Value1, v)
@@ -353,17 +354,17 @@ func TestTxHas(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if v, err := ctx.Client.TxHas(ctx.Key1, TestGasInfo()); err != nil {
+	if v, err := ctx.Client.TxHas(ctx.Key1, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		assert.True(!v)
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if v, err := ctx.Client.TxHas(ctx.Key1, TestGasInfo()); err != nil {
+	if v, err := ctx.Client.TxHas(ctx.Key1, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		assert.True(v)
@@ -379,16 +380,16 @@ func TestTxCount(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	count, err := ctx.Client.TxCount(TestGasInfo())
+	count, err := ctx.Client.TxCount(GetTestGasInfo())
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if newAccount, err := ctx.Client.TxCount(TestGasInfo()); err != nil {
+	if newAccount, err := ctx.Client.TxCount(GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		assert.Equal(newAccount, count+1)
@@ -404,7 +405,7 @@ func TestTxKeys(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if keys, err := ctx.Client.TxKeys(TestGasInfo()); err != nil {
+	if keys, err := ctx.Client.TxKeys(GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		for _, k := range keys {
@@ -412,11 +413,11 @@ func TestTxKeys(t *testing.T) {
 		}
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if keys, err := ctx.Client.TxKeys(TestGasInfo()); err != nil {
+	if keys, err := ctx.Client.TxKeys(GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		found := false
@@ -440,7 +441,7 @@ func TestTxKeyValues(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if kvs, err := ctx.Client.TxKeyValues(TestGasInfo()); err != nil {
+	if kvs, err := ctx.Client.TxKeyValues(GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		for _, kv := range kvs {
@@ -448,11 +449,11 @@ func TestTxKeyValues(t *testing.T) {
 		}
 	}
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if kvs, err := ctx.Client.TxKeyValues(TestGasInfo()); err != nil {
+	if kvs, err := ctx.Client.TxKeyValues(GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		found := false
@@ -476,11 +477,11 @@ func TestTxGetLease(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if v, err := ctx.Client.TxGetLease(ctx.Key1, TestGasInfo()); err != nil {
+	if v, err := ctx.Client.TxGetLease(ctx.Key1, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		assert.True(v > 0)
@@ -496,11 +497,11 @@ func TestTxGetNShortestLeases(t *testing.T) {
 	}
 	defer ctx.TestTearDown()
 
-	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, TestGasInfo(), nil); err != nil {
+	if err := ctx.Client.Create(ctx.Key1, ctx.Value1, GetTestGasInfo(), nil); err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	if v, err := ctx.Client.TxGetNShortestLeases(10, TestGasInfo()); err != nil {
+	if v, err := ctx.Client.TxGetNShortestLeases(10, GetTestGasInfo()); err != nil {
 		t.Fatalf("%s", err)
 	} else {
 		assert.True(len(v) > 0)

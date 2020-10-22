@@ -16,7 +16,7 @@ func main() {
 
 	log.Infof("deleting all keys...")
 
-	if err := ctx.DeleteAll(bluzelle.TestGasInfo()); err != nil {
+	if err := ctx.DeleteAll(bluzelle.GetTestGasInfo()); err != nil {
 		log.Fatalf("%s", err)
 	} else {
 		log.Infof("done")

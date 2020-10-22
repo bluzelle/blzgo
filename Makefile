@@ -132,6 +132,9 @@ multi:
 uuid:
 	@go run examples/$@/*.go
 
+performance:
+	@go run examples/$@/*.go
+
 pkgs:
 	@dep ensure
 

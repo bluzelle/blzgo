@@ -1,8 +1,9 @@
 package bluzelle
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRequiresMnemonic(t *testing.T) {
@@ -44,7 +45,7 @@ func TestAddressDerivation(t *testing.T) {
 	}
 
 	// validate addr
-	assert.Equal(ctx.Client.Address, TestAddress())
+	assert.Equal(GetTestAddress(), ctx.Client.Address)
 }
 
 func TestGetNShortestLeasesHumanized(t *testing.T) {
